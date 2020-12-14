@@ -69,7 +69,6 @@ namespace Bokhandel.Forms
             this.treeViewCustomerOrders.Name = "treeViewCustomerOrders";
             this.treeViewCustomerOrders.Size = new System.Drawing.Size(265, 450);
             this.treeViewCustomerOrders.TabIndex = 0;
-            //this.treeViewCustomerOrders.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.treeViewCustomerOrders_AfterExpand);
             this.treeViewCustomerOrders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewCustomerOrders_AfterSelect);
             // 
             // splitContainer2
@@ -99,6 +98,7 @@ namespace Bokhandel.Forms
             this.dataGridView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.dataGridView.Name = "dataGridView";
             this.dataGridView.ReadOnly = true;
+            this.dataGridView.RowHeadersVisible = false;
             this.dataGridView.RowTemplate.Height = 25;
             this.dataGridView.Size = new System.Drawing.Size(531, 272);
             this.dataGridView.TabIndex = 0;

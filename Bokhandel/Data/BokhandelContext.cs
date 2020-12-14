@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Bokhandel.Models;
+using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 

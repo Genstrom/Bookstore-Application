@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
+using Bokhandel.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bokhandel.Forms

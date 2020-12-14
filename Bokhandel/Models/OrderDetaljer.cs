@@ -1,5 +1,7 @@
 ﻿#nullable disable
 
+using Bokhandel.Models;
+
 namespace Bokhandel
 {
     public class Orderdetaljer
