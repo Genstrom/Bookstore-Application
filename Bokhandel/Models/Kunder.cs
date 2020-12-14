@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 #nullable disable
 
 namespace Bokhandel
 {
-    public partial class Kunder
+    public class Kunder
     {
         public Kunder()
         {
-            Ordrars = new HashSet<Ordrar>();
+            Orders = new HashSet<Order>();
         }
 
         public string Id { get; set; }
@@ -21,6 +20,6 @@ namespace Bokhandel
         public string Epostadress { get; set; }
         public string Telefonnummer { get; set; }
 
-        public virtual ICollection<Ordrar> Ordrars { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
     }
 }

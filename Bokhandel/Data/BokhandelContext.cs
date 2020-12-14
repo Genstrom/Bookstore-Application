@@ -1,12 +1,10 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 
 namespace Bokhandel
 {
-    public partial class BokhandelContext : DbContext
+    public class BokhandelContext : DbContext
     {
         public BokhandelContext()
         {
@@ -20,21 +18,19 @@ namespace Bokhandel
         public virtual DbSet<Butiker> Butiker { get; set; }
         public virtual DbSet<Böcker> Böcker { get; set; }
         public virtual DbSet<Författare> Författare { get; set; }
-        public virtual DbSet<FörfattareBöckerFörlag> FörfattareBöckerFörlag { get; set; }
+        public virtual DbSet<FörfattareBöckerFörlag> FörfattareBöckerFörlags { get; set; }
         public virtual DbSet<Förlag> Förlag { get; set; }
         public virtual DbSet<Kunder> Kunder { get; set; }
         public virtual DbSet<LagerSaldo> LagerSaldo { get; set; }
-        public virtual DbSet<OrderDetaljer> OrderDetaljer { get; set; }
-        public virtual DbSet<Ordrar> Ordrar { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<Orderdetaljer> Orderdetaljer { get; set; }
         public virtual DbSet<TitlarPerFörfattare> TitlarPerFörfattare { get; set; }
         public virtual DbSet<ToppTioKunder> ToppTioKunder { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer("Server=TOMMY;Database=Bokhandel;Trusted_Connection=True;");
-            }
+                optionsBuilder.UseSqlServer("Server=localhost;Database=Bokhandel;Trusted_Connection=True;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -106,7 +102,7 @@ namespace Bokhandel
 
             modelBuilder.Entity<FörfattareBöckerFörlag>(entity =>
             {
-                entity.HasKey(e => new { e.Isbn, e.FörfattareId, e.FörlagsId })
+                entity.HasKey(e => new {e.Isbn, e.FörfattareId, e.FörlagsId})
                     .HasName("PK_FörfattareBöcker");
 
                 entity.ToTable("FörfattareBöckerFörlag");
@@ -210,7 +206,7 @@ namespace Bokhandel
 
             modelBuilder.Entity<LagerSaldo>(entity =>
             {
-                entity.HasKey(e => new { e.ButiksId, e.Isbn });
+                entity.HasKey(e => new {e.ButiksId, e.Isbn});
 
                 entity.ToTable("LagerSaldo");
 
@@ -233,9 +229,29 @@ namespace Bokhandel
                     .HasConstraintName("FK_LagerSaldo_Böcker");
             });
 
-            modelBuilder.Entity<OrderDetaljer>(entity =>
+            modelBuilder.Entity<Order>(entity =>
             {
-                entity.ToTable("OrderDetaljer");
+                entity.Property(e => e.OrderId).HasColumnName("OrderID");
+
+                entity.Property(e => e.KundId)
+                    .IsRequired()
+                    .HasMaxLength(11)
+                    .HasColumnName("KundID");
+
+                entity.Property(e => e.Leveransdatum).HasColumnType("date");
+
+                entity.Property(e => e.Orderdatum).HasColumnType("date");
+
+                entity.HasOne(d => d.Kund)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.KundId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Orders_Kunder");
+            });
+
+            modelBuilder.Entity<Orderdetaljer>(entity =>
+            {
+                entity.ToTable("Orderdetaljer");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
 
@@ -244,59 +260,21 @@ namespace Bokhandel
                     .HasMaxLength(13)
                     .HasColumnName("ISBN");
 
-                entity.Property(e => e.Leveransdatum).HasColumnType("datetime");
-
                 entity.Property(e => e.OrderId).HasColumnName("OrderID");
 
-                entity.Property(e => e.Orderdatum).HasColumnType("datetime");
+                entity.Property(e => e.Pris).HasColumnType("money");
 
                 entity.HasOne(d => d.IsbnNavigation)
-                    .WithMany(p => p.OrderDetaljers)
+                    .WithMany(p => p.Orderdetaljers)
                     .HasForeignKey(d => d.Isbn)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_OrderDetaljer_Böcker");
+                    .HasConstraintName("FK_Orderdetaljer_Böcker");
 
                 entity.HasOne(d => d.Order)
-                    .WithMany(p => p.OrderDetaljers)
+                    .WithMany(p => p.Orderdetaljers)
                     .HasForeignKey(d => d.OrderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_OrderDetaljer_Ordrar");
-            });
-
-            modelBuilder.Entity<Ordrar>(entity =>
-            {
-                entity.HasKey(e => e.OrderId);
-
-                entity.ToTable("Ordrar");
-
-                entity.Property(e => e.OrderId).HasColumnName("OrderID");
-
-                entity.Property(e => e.Betalningssätt)
-                    .IsRequired()
-                    .HasMaxLength(15);
-
-                entity.Property(e => e.ButiksId).HasColumnName("ButiksID");
-
-                entity.Property(e => e.KundId)
-                    .IsRequired()
-                    .HasMaxLength(11)
-                    .HasColumnName("KundID");
-
-                entity.Property(e => e.Moms).HasColumnType("money");
-
-                entity.Property(e => e.Totalbelopp).HasColumnType("money");
-
-                entity.HasOne(d => d.Butiks)
-                    .WithMany(p => p.Ordrars)
-                    .HasForeignKey(d => d.ButiksId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Ordrar_Butiker");
-
-                entity.HasOne(d => d.Kund)
-                    .WithMany(p => p.Ordrars)
-                    .HasForeignKey(d => d.KundId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Ordrar_Kunder");
+                    .HasConstraintName("FK_Orderdetaljer_Orders");
             });
 
             modelBuilder.Entity<TitlarPerFörfattare>(entity =>
@@ -331,10 +309,6 @@ namespace Bokhandel
                     .HasColumnType("money")
                     .HasColumnName("Totalbelopp inkl. moms");
             });
-
-            OnModelCreatingPartial(modelBuilder);
         }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

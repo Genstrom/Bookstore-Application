@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 #nullable disable
 
 namespace Bokhandel
 {
-    public partial class Förlag
+    public class Förlag
     {
         public Förlag()
         {

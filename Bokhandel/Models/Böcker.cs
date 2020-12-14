@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace Bokhandel
 {
-    public partial class Böcker
+    public class Böcker
     {
         public Böcker()
         {
             FörfattareBöckerFörlags = new HashSet<FörfattareBöckerFörlag>();
             LagerSaldos = new HashSet<LagerSaldo>();
-            OrderDetaljers = new HashSet<OrderDetaljer>();
+            Orderdetaljers = new HashSet<Orderdetaljer>();
         }
 
         public string Isbn { get; set; }
@@ -22,6 +22,6 @@ namespace Bokhandel
 
         public virtual ICollection<FörfattareBöckerFörlag> FörfattareBöckerFörlags { get; set; }
         public virtual ICollection<LagerSaldo> LagerSaldos { get; set; }
-        public virtual ICollection<OrderDetaljer> OrderDetaljers { get; set; }
+        public virtual ICollection<Orderdetaljer> Orderdetaljers { get; set; }
     }
 }

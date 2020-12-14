@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Bokhandel
 {
-    public partial class Författare
+    public class Författare
     {
         public Författare()
         {

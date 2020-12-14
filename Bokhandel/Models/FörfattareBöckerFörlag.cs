@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-#nullable disable
+﻿#nullable disable
 
 namespace Bokhandel
 {
-    public partial class FörfattareBöckerFörlag
+    public class FörfattareBöckerFörlag
     {
         public string Isbn { get; set; }
         public int FörfattareId { get; set; }

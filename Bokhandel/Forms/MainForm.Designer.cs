@@ -32,7 +32,7 @@ namespace Bokhandel.Forms
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.treeViewCustomerOrders = new System.Windows.Forms.TreeView();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.dataGridViewOrderDetails = new System.Windows.Forms.DataGridView();
+            this.dataGridView = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -40,13 +40,14 @@ namespace Bokhandel.Forms
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewOrderDetails)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -57,43 +58,50 @@ namespace Bokhandel.Forms
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(800, 450);
-            this.splitContainer1.SplitterDistance = 266;
+            this.splitContainer1.SplitterDistance = 265;
             this.splitContainer1.TabIndex = 0;
             // 
             // treeViewCustomerOrders
             // 
             this.treeViewCustomerOrders.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeViewCustomerOrders.Location = new System.Drawing.Point(0, 0);
+            this.treeViewCustomerOrders.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.treeViewCustomerOrders.Name = "treeViewCustomerOrders";
-            this.treeViewCustomerOrders.Size = new System.Drawing.Size(266, 450);
+            this.treeViewCustomerOrders.Size = new System.Drawing.Size(265, 450);
             this.treeViewCustomerOrders.TabIndex = 0;
+            //this.treeViewCustomerOrders.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.treeViewCustomerOrders_AfterExpand);
+            this.treeViewCustomerOrders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewCustomerOrders_AfterSelect);
             // 
             // splitContainer2
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.splitContainer2.Name = "splitContainer2";
             this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.dataGridViewOrderDetails);
-            this.splitContainer2.Size = new System.Drawing.Size(530, 450);
-            this.splitContainer2.SplitterDistance = 176;
+            this.splitContainer2.Panel2.Controls.Add(this.dataGridView);
+            this.splitContainer2.Size = new System.Drawing.Size(531, 450);
+            this.splitContainer2.SplitterDistance = 175;
+            this.splitContainer2.SplitterWidth = 3;
             this.splitContainer2.TabIndex = 0;
             // 
-            // dataGridViewOrderDetails
+            // dataGridView
             // 
-            this.dataGridViewOrderDetails.AllowUserToAddRows = false;
-            this.dataGridViewOrderDetails.AllowUserToDeleteRows = false;
-            this.dataGridViewOrderDetails.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewOrderDetails.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridViewOrderDetails.Location = new System.Drawing.Point(0, 0);
-            this.dataGridViewOrderDetails.Name = "dataGridViewOrderDetails";
-            this.dataGridViewOrderDetails.ReadOnly = true;
-            this.dataGridViewOrderDetails.RowTemplate.Height = 25;
-            this.dataGridViewOrderDetails.Size = new System.Drawing.Size(530, 270);
-            this.dataGridViewOrderDetails.TabIndex = 0;
+            this.dataGridView.AllowUserToAddRows = false;
+            this.dataGridView.AllowUserToDeleteRows = false;
+            this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridView.Location = new System.Drawing.Point(0, 0);
+            this.dataGridView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.dataGridView.Name = "dataGridView";
+            this.dataGridView.ReadOnly = true;
+            this.dataGridView.RowTemplate.Height = 25;
+            this.dataGridView.Size = new System.Drawing.Size(531, 272);
+            this.dataGridView.TabIndex = 0;
             // 
             // MainForm
             // 
@@ -101,6 +109,7 @@ namespace Bokhandel.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.splitContainer1);
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "MainForm";
             this.Text = "MainForm";
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -110,16 +119,17 @@ namespace Bokhandel.Forms
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewOrderDetails)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).EndInit();
             this.ResumeLayout(false);
 
         }
+
+        private System.Windows.Forms.DataGridView dataGridView;
 
         #endregion
 
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.TreeView treeViewCustomerOrders;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.DataGridView dataGridViewOrderDetails;
     }
 }

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-#nullable disable
+﻿#nullable disable
 
 namespace Bokhandel
 {
-    public partial class LagerSaldo
+    public class LagerSaldo
     {
         public int ButiksId { get; set; }
         public string Isbn { get; set; }

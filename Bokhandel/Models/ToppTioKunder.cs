@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-#nullable disable
+﻿#nullable disable
 
 namespace Bokhandel
 {
-    public partial class ToppTioKunder
+    public class ToppTioKunder
     {
         public string Id { get; set; }
         public string Namn { get; set; }
