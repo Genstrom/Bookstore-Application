@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
-#nullable disable
-
-namespace Bokhandel
+namespace Bokhandel.Models
 {
     public class Order
     {

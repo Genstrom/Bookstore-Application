@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Bokhandel.Models;
+using System.Collections.Generic;
 
 #nullable disable
 

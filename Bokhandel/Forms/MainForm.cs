@@ -1,7 +1,10 @@
-﻿using System.Diagnostics;
+﻿using Bokhandel.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Microsoft.EntityFrameworkCore;
 
 namespace Bokhandel.Forms
 {
@@ -145,73 +148,73 @@ namespace Bokhandel.Forms
             switch (e.Node.Tag)
             {
                 case Butiker butik:
-                {
-                    dataGridView.Rows.Clear();
-                    dataGridView.Columns.Clear();
-                    dataGridView.Columns.Add("ISBN", "ISBN");
-                    dataGridView.Columns.Add("Titel", "Titel");
-                    dataGridView.Columns.Add("Lagersaldo", "Lagersaldo");
-                    dataGridView.Columns.Add("Pris", "Pris");
-                    foreach (var bok in böcker)
-                    foreach (var saldo in lagerSaldo)
-                        if (saldo.ButiksId == butik.Id)
-                            if (bok.Isbn == saldo.Isbn)
-                                dataGridView.Rows.Add(bok.Isbn, bok.Titel, saldo.Antal, bok.Pris.ToString("0.##"));
+                    {
+                        dataGridView.Rows.Clear();
+                        dataGridView.Columns.Clear();
+                        dataGridView.Columns.Add("ISBN", "ISBN");
+                        dataGridView.Columns.Add("Titel", "Titel");
+                        dataGridView.Columns.Add("Lagersaldo", "Lagersaldo");
+                        dataGridView.Columns.Add("Pris", "Pris");
+                        foreach (var bok in böcker)
+                            foreach (var saldo in lagerSaldo)
+                                if (saldo.ButiksId == butik.Id)
+                                    if (bok.Isbn == saldo.Isbn)
+                                        dataGridView.Rows.Add(bok.Isbn, bok.Titel, saldo.Antal, bok.Pris.ToString("0.##"));
 
-                    break;
-                }
+                        break;
+                    }
                 case Författare person:
-                {
-                    dataGridView.Rows.Clear();
-                    dataGridView.Columns.Clear();
-                    dataGridView.Columns.Add("ISBN", "ISBN");
-                    dataGridView.Columns.Add("Titel", "Titel");
-                    dataGridView.Columns.Add("Språk", "Språk");
-                    dataGridView.Columns.Add("Utgivningsdatum", "Utgivningsdatum");
-                    foreach (var bokFörfattare in författarePerBok)
-                    foreach (var bok in böcker)
-                        if (person.FörfattareId == bokFörfattare.FörfattareId)
-                            if (bok.Isbn == bokFörfattare.Isbn)
-                                dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Utgivningsdatum);
+                    {
+                        dataGridView.Rows.Clear();
+                        dataGridView.Columns.Clear();
+                        dataGridView.Columns.Add("ISBN", "ISBN");
+                        dataGridView.Columns.Add("Titel", "Titel");
+                        dataGridView.Columns.Add("Språk", "Språk");
+                        dataGridView.Columns.Add("Utgivningsdatum", "Utgivningsdatum");
+                        foreach (var bokFörfattare in författarePerBok)
+                            foreach (var bok in böcker)
+                                if (person.FörfattareId == bokFörfattare.FörfattareId)
+                                    if (bok.Isbn == bokFörfattare.Isbn)
+                                        dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Utgivningsdatum);
 
-                    break;
-                }
+                        break;
+                    }
                 case Order order:
-                {
-                    dataGridView.Rows.Clear();
-                    dataGridView.Columns.Clear();
-                    dataGridView.Columns.Add("KundID", "KundID");
-                    dataGridView.Columns.Add("ISBN", "ISBN");
-                    dataGridView.Columns.Add("Titel", "Titel");
-                    dataGridView.Columns.Add("Pris", "Pris");
-                    dataGridView.Columns.Add("Antal", "Antal");
+                    {
+                        dataGridView.Rows.Clear();
+                        dataGridView.Columns.Clear();
+                        dataGridView.Columns.Add("KundID", "KundID");
+                        dataGridView.Columns.Add("ISBN", "ISBN");
+                        dataGridView.Columns.Add("Titel", "Titel");
+                        dataGridView.Columns.Add("Pris", "Pris");
+                        dataGridView.Columns.Add("Antal", "Antal");
 
-                    foreach (var ordrar in orders)
-                    foreach (var detalj in ordrar.Orderdetaljers)
-                    foreach (var bok in böcker)
-                        if (detalj.Isbn == bok.Isbn)
-                            if (order.OrderId == detalj.OrderId)
-                                dataGridView.Rows.Add(ordrar.KundId, detalj.Isbn, bok.Titel, detalj.Pris, detalj.Antal);
+                        foreach (var ordrar in orders)
+                            foreach (var detalj in ordrar.Orderdetaljers)
+                                foreach (var bok in böcker)
+                                    if (detalj.Isbn == bok.Isbn)
+                                        if (order.OrderId == detalj.OrderId)
+                                            dataGridView.Rows.Add(ordrar.KundId, detalj.Isbn, bok.Titel, detalj.Pris, detalj.Antal);
 
-                    break;
-                }
+                        break;
+                    }
                 case Förlag förlags:
-                {
-                    dataGridView.Rows.Clear();
-                    dataGridView.Columns.Clear();
-                    dataGridView.Columns.Add("FörlagsID", "FörlagsID");
-                    dataGridView.Columns.Add("Kontaktperson", "Kontaktperson");
-                    dataGridView.Columns.Add("Telefonnummer", "Telefonnummer");
-                    dataGridView.Columns.Add("Titlar", "Titlar");
-                    foreach (var bokFörfattare in författarePerBok)
-                    foreach (var bok in böcker)
-                        if (bokFörfattare.FörlagsId == förlags.FörlagsId)
-                            if (bokFörfattare.Isbn == bok.Isbn)
-                                dataGridView.Rows.Add(förlags.FörlagsId, förlags.Kontaktperson, förlags.Telefonnummer,
-                                    bok.Titel);
+                    {
+                        dataGridView.Rows.Clear();
+                        dataGridView.Columns.Clear();
+                        dataGridView.Columns.Add("FörlagsID", "FörlagsID");
+                        dataGridView.Columns.Add("Kontaktperson", "Kontaktperson");
+                        dataGridView.Columns.Add("Telefonnummer", "Telefonnummer");
+                        dataGridView.Columns.Add("Titlar", "Titlar");
+                        foreach (var bokFörfattare in författarePerBok)
+                            foreach (var bok in böcker)
+                                if (bokFörfattare.FörlagsId == förlags.FörlagsId)
+                                    if (bokFörfattare.Isbn == bok.Isbn)
+                                        dataGridView.Rows.Add(förlags.FörlagsId, förlags.Kontaktperson, förlags.Telefonnummer,
+                                            bok.Titel);
 
-                    break;
-                }
+                        break;
+                    }
                 case Kunder kund:
                     dataGridView.Rows.Clear();
                     dataGridView.Columns.Clear();
@@ -223,6 +226,40 @@ namespace Bokhandel.Forms
                     dataGridView.Rows.Add(kund.Id, kund.Förnamn + " " + kund.Efternamn, kund.Adress, kund.Epostadress,
                         kund.Telefonnummer);
                     break;
+            }
+        }
+
+        private void treeViewCustomerOrders_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                var node = treeViewCustomerOrders.GetNodeAt(e.X, e.Y);
+                treeViewCustomerOrders.SelectedNode = node;
+
+                if (node.Tag is Order)
+                {
+                    contextMenuStrip.Show(treeViewCustomerOrders.PointToScreen(new Point(e.X, e.Y)));
+                }
+
+            }
+        }
+
+        private void dataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            
+            var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+            if (e.ColumnIndex == dataGridView.Columns["Lagersaldo"].DisplayIndex)
+            {
+                var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
+
+                int result;
+
+                if (Int32.TryParse(cell.Value.ToString(), out result))
+                {
+                    //lagerSaldo.Antal = result;
+                }
             }
         }
     }
