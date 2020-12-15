@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 #nullable disable
 
 namespace Bokhandel
 {
+    [DebuggerDisplay("{Titel}")]
     public class Böcker
     {
         public Böcker()
@@ -23,5 +25,6 @@ namespace Bokhandel
         public virtual ICollection<FörfattareBöckerFörlag> FörfattareBöckerFörlags { get; set; }
         public virtual ICollection<LagerSaldo> LagerSaldos { get; set; }
         public virtual ICollection<Orderdetaljer> Orderdetaljers { get; set; }
+        public object This { get { return this; } }
     }
 }

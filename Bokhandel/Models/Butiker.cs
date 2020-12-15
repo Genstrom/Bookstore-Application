@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 #nullable disable
 
 namespace Bokhandel
 {
+    [DebuggerDisplay("{Namn}, {Adress}")]
     public class Butiker
     {
         public Butiker()
