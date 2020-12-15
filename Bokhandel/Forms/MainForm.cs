@@ -1,6 +1,7 @@
 ﻿using Bokhandel.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -10,15 +11,20 @@ namespace Bokhandel.Forms
 {
     public partial class MainForm : Form
     {
+        private BokhandelContext db = new BokhandelContext();
+        private List<Böcker> böcker;
         public MainForm()
         {
             InitializeComponent();
-            using var db = new BokhandelContext();
+        }
 
+        private void MainForm_Load(object sender, EventArgs e)
+        {
             if (db.Database.CanConnect())
             {
+                böcker = db.Böcker.OrderBy(b => b.Titel).ToList();
+                var lagerSaldo = db.LagerSaldo.ToList();
                 var kunder = db.Kunder.ToList();
-                var böcker = db.Böcker.ToList();
                 var orders = db.Orders.Include(od => od.Orderdetaljers).ToList();
                 var butiker = db.Butiker.ToList();
                 var författare = db.Författare.ToList();
@@ -127,13 +133,11 @@ namespace Bokhandel.Forms
             }
         }
 
-
         private void treeViewCustomerOrders_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (e.Node.Index < 0) return;
             dataGridView.Columns.Clear();
             dataGridView.Rows.Clear();
-            using var db = new BokhandelContext();
             var lagerSaldo = db.LagerSaldo.ToList();
             var kunder = db.Kunder.ToList();
             var böcker = db.Böcker.ToList();
@@ -143,7 +147,6 @@ namespace Bokhandel.Forms
             var förlag = db.Förlag.ToList();
             var författarePerBok = db.FörfattareBöckerFörlags;
             var orderDetaljer = db.Orderdetaljer.ToList();
-            var tableNames = db.Model.GetEntityTypes();
 
             switch (e.Node.Tag)
             {
@@ -152,14 +155,31 @@ namespace Bokhandel.Forms
                         dataGridView.Rows.Clear();
                         dataGridView.Columns.Clear();
                         dataGridView.Columns.Add("ISBN", "ISBN");
-                        dataGridView.Columns.Add("Titel", "Titel");
+                        var titelColumn = new DataGridViewComboBoxColumn
+                        {
+                            Name = "Titel",
+                            HeaderText = "Titel",
+                        };
+                        dataGridView.Columns.Add(titelColumn);
                         dataGridView.Columns.Add("Lagersaldo", "Lagersaldo");
                         dataGridView.Columns.Add("Pris", "Pris");
                         foreach (var bok in böcker)
                             foreach (var saldo in lagerSaldo)
                                 if (saldo.ButiksId == butik.Id)
                                     if (bok.Isbn == saldo.Isbn)
-                                        dataGridView.Rows.Add(bok.Isbn, bok.Titel, saldo.Antal, bok.Pris.ToString("0.##"));
+                                    {
+                                        int rowIndex = dataGridView.Rows.Add(bok.Isbn, bok.Titel, saldo.Antal, bok.Pris.ToString("0.##"));
+                                        dataGridView.Rows[rowIndex].Tag = saldo;
+
+                                        var comboBoxCell = dataGridView.Rows[rowIndex].Cells["Titel"] as DataGridViewComboBoxCell;
+                                        comboBoxCell.ValueType = typeof(Böcker);
+                                        comboBoxCell.DisplayMember = "ProductName";
+                                        comboBoxCell.ValueMember = "This";
+
+                                            comboBoxCell.Items.Add(bok);
+                                        
+
+                                    }
 
                         break;
                     }
@@ -236,31 +256,36 @@ namespace Bokhandel.Forms
                 var node = treeViewCustomerOrders.GetNodeAt(e.X, e.Y);
                 treeViewCustomerOrders.SelectedNode = node;
 
-                if (node.Tag is Order)
+                // TODO: Gör en switchcase med respektive funtion ex; Add order till kunder, add book till författare
+                if (node.Tag == null || node.Tag is Kunder)
                 {
-                    contextMenuStrip.Show(treeViewCustomerOrders.PointToScreen(new Point(e.X, e.Y)));
+                    toolStripMenuItemDelete.Visible = false;
                 }
-
+                else
+                {
+                    toolStripMenuItemDelete.Visible = true;
+                }
+                contextMenuStrip.Show(treeViewCustomerOrders.PointToScreen(new Point(e.X, e.Y)));
             }
         }
 
         private void dataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
-            
+
             var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
 
             if (e.ColumnIndex == dataGridView.Columns["Lagersaldo"].DisplayIndex)
             {
                 var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
 
-                int result;
-
-                if (Int32.TryParse(cell.Value.ToString(), out result))
+                if (Int32.TryParse(cell.Value.ToString(), out int result))
                 {
-                    //lagerSaldo.Antal = result;
+                    lagerSaldo.Antal = result;
+                    db.SaveChanges();
                 }
             }
         }
+
     }
 }
