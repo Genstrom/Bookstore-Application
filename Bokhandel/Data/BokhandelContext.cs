@@ -30,7 +30,7 @@ namespace Bokhandel
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-                optionsBuilder.UseSqlServer("Server=TOMMY;Database=Bokhandel;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer("Server=localhost;Database=Bokhandel;Trusted_Connection=True;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

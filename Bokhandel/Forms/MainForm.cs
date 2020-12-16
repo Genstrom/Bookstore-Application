@@ -168,16 +168,20 @@ namespace Bokhandel.Forms
                                 if (saldo.ButiksId == butik.Id)
                                     if (bok.Isbn == saldo.Isbn)
                                     {
-                                        int rowIndex = dataGridView.Rows.Add(bok.Isbn, bok.Titel, saldo.Antal, bok.Pris.ToString("0.##"));
+                                        int rowIndex = dataGridView.Rows.Add(/*bok.Isbn, bok, saldo.Antal, bok.Pris.ToString("0.##")*/);
                                         dataGridView.Rows[rowIndex].Tag = saldo;
-
                                         var comboBoxCell = dataGridView.Rows[rowIndex].Cells["Titel"] as DataGridViewComboBoxCell;
-                                        comboBoxCell.ValueType = typeof(Böcker);
-                                        comboBoxCell.DisplayMember = "ProductName";
+                                        comboBoxCell.ValueType = typeof(Bokhandel.Böcker);
+                                        comboBoxCell.DisplayMember =  "Titel";
                                         comboBoxCell.ValueMember = "This";
-
-                                            comboBoxCell.Items.Add(bok);
-                                        
+                                        foreach (var bok1 in böcker)
+                                        {
+                                            comboBoxCell.Items.Add(bok1.This);
+                                        }
+                                        dataGridView.Rows[rowIndex].Cells["ISBN"].Value = bok.Isbn;
+                                        dataGridView.Rows[rowIndex].Cells["Titel"].Value = bok.This;
+                                        dataGridView.Rows[rowIndex].Cells["Lagersaldo"].Value = saldo.Antal;
+                                        dataGridView.Rows[rowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
 
                                     }
 
@@ -274,6 +278,17 @@ namespace Bokhandel.Forms
             if (e.RowIndex < 0) return;
 
             var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            //Jag har inte testat koden. Jag tycker inte du ska testa koden innan du lägger till för att skapa nya rows
+            // så slipper du ändra i databasen. Eller om du har breeakpoint på save som jag har ju så du inte går förbi det.
+            if (cell is DataGridViewComboBoxCell comboBoxCell)
+            {
+                var bok = comboBoxCell.Value as Böcker;
+                dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = bok.Pris;
+                dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = bok.Isbn;
+                dataGridView.Rows[e.RowIndex].Cells["Antal"].Value = 0;
+            }
+
+
 
             if (e.ColumnIndex == dataGridView.Columns["Lagersaldo"].DisplayIndex)
             {

@@ -26,5 +26,6 @@ namespace Bokhandel
         public virtual ICollection<LagerSaldo> LagerSaldos { get; set; }
         public virtual ICollection<Orderdetaljer> Orderdetaljers { get; set; }
         public object This { get { return this; } }
+        
     }
 }
