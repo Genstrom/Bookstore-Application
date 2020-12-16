@@ -179,7 +179,7 @@ namespace Bokhandel.Forms
                                             comboBoxCell.Items.Add(bok1.This);
                                         }
                                         dataGridView.Rows[rowIndex].Cells["ISBN"].Value = bok.Isbn;
-                                        dataGridView.Rows[rowIndex].Cells["Titel"].Value = bok.This;
+                                        dataGridView.Rows[rowIndex].Cells["Titel"].Value = bok;
                                         dataGridView.Rows[rowIndex].Cells["Lagersaldo"].Value = saldo.Antal;
                                         dataGridView.Rows[rowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
 
@@ -287,7 +287,6 @@ namespace Bokhandel.Forms
                 dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = bok.Isbn;
                 dataGridView.Rows[e.RowIndex].Cells["Antal"].Value = 0;
             }
-
 
 
             if (e.ColumnIndex == dataGridView.Columns["Lagersaldo"].DisplayIndex)
