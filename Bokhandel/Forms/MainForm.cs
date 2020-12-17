@@ -29,7 +29,7 @@ namespace Bokhandel.Forms
             if (db.Database.CanConnect())
             {
                 böcker = db.Böcker.OrderBy(b => b.Titel).ToList();
-                var lagerSaldo = db.LagerSaldo.ToList();
+                //var lagerSaldo = db.LagerSaldo.ToList();
                 var kunder = db.Kunder.ToList();
                 var orders = db.Orders.Include(od => od.Orderdetaljers).ToList();
                 butiker = db.Butiker.Include(l => l.LagerSaldos).ToList();
@@ -151,14 +151,14 @@ namespace Bokhandel.Forms
             dataGridView.Columns.Clear();
             dataGridView.Rows.Clear();
             var lagerSaldo = db.LagerSaldo.ToList();
-            var kunder = db.Kunder.ToList();
+            //var kunder = db.Kunder.ToList();
             var böcker = db.Böcker.ToList();
             var orders = db.Orders.ToList();
-            var butiker = db.Butiker.Include(b => b.LagerSaldos).ToList();
+            //var butiker = db.Butiker.Include(b => b.LagerSaldos).ToList();
             Författare = db.Författare.ToList();
-            var förlag = db.Förlag.ToList();
+            //var förlag = db.Förlag.ToList();
             var författarePerBok = db.FörfattareBöckerFörlags;
-            var orderDetaljer = db.Orderdetaljer.ToList();
+            //var orderDetaljer = db.Orderdetaljer.ToList();
 
             switch (e.Node.Tag)
             {
@@ -353,7 +353,7 @@ namespace Bokhandel.Forms
             var ISBNList = new List<string>();
             var lagerSaldoLista = butik.LagerSaldos.ToList();
 
-            var butikEtt = butiker[1];
+            //var butikEtt = butiker[1];
 
             foreach (var lagerSaldo in lagerSaldoLista)
             {
