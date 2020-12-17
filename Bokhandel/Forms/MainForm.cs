@@ -14,6 +14,8 @@ namespace Bokhandel.Forms
         private BokhandelContext db = new BokhandelContext();
         private List<Böcker> böcker;
         private Butiker activeButik = null;
+        private LagerSaldo LagerSaldos = null;
+        private int indexOfRow = 0;
         public MainForm()
         {
             InitializeComponent();
@@ -136,6 +138,12 @@ namespace Bokhandel.Forms
 
         private void treeViewCustomerOrders_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            if (LagerSaldos != null)
+            {
+                LagerSaldos.Isbn = dataGridView.Rows[indexOfRow].Cells["ISBN"].Value.ToString();
+                activeButik.LagerSaldos.Add(LagerSaldos);
+            }
+            
             db.SaveChanges();
             if (e.Node.Index < 0) return;
             dataGridView.Columns.Clear();
@@ -304,7 +312,7 @@ namespace Bokhandel.Forms
                 return;
 
             var node = treeViewCustomerOrders.SelectedNode;
-            var lagerSaldo = new LagerSaldo()
+             LagerSaldos= new LagerSaldo()
             {
                 ButiksId = activeButik.Id
                 
@@ -313,18 +321,21 @@ namespace Bokhandel.Forms
 
             if (node.Tag is Butiker butik)
             {
-                var rowIndex = dataGridView.Rows.Add();
-                dataGridView.Rows[rowIndex].Tag = lagerSaldo;
+                 indexOfRow = dataGridView.Rows.Add();
+                dataGridView.Rows[indexOfRow].Tag = LagerSaldos;
 
-                var comboBoxCell = PopulaComboBoxCell(rowIndex);
+                var comboBoxCell = PopulaComboBoxCell(indexOfRow);
+                comboBoxCell.ValueMember = "This";
+                foreach (var bok in böcker)
+                {
+                    comboBoxCell.Items.Add(bok.This);
+                }
                 comboBoxCell.Value = böcker[0];
-                lagerSaldo.Isbn = dataGridView.Rows[rowIndex].Cells["ISBN"].Value.ToString();
 
             }
-
-    
             
-            activeButik.LagerSaldos.Add(lagerSaldo);
+            
+            
         }
 
         private DataGridViewComboBoxCell PopulaComboBoxCell(int rowIndex)
