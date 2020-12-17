@@ -10,9 +10,13 @@ namespace Bokhandel.Forms
 {
     public partial class FormAddFörfattare : Form
     {
-        public FormAddFörfattare()
+
+        public FormAddFörfattare(List<Författare> författarList)
         {
             InitializeComponent();
+            Författare = författarList;
         }
+
+        public List<Författare> Författare { get; set; }
     }
 }
