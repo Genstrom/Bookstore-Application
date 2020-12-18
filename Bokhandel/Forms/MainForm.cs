@@ -16,6 +16,7 @@ namespace Bokhandel.Forms
         private List<Butiker> butiker;
         private Butiker activeButik = null;
         private LagerSaldo LagerSaldos = null;
+        private List<String> ISBNList = new List<String>();
         private int indexOfRow = 0;
 
         public List<Författare> Författare { get; set; }
@@ -37,6 +38,12 @@ namespace Bokhandel.Forms
                 var förlag = db.Förlag.ToList();
                 var tableNames = db.Model.GetEntityTypes();
                 var tableList = tableNames.ToList();
+
+                foreach (var bok in böcker)
+                {
+                    ISBNList.Add(bok.Isbn);
+                }
+
                 tableList.Remove(tableList[1]);
                 tableList.Remove(tableList[2]);
                 tableList.Remove(tableList[4]);
@@ -145,20 +152,20 @@ namespace Bokhandel.Forms
 
         private void treeViewCustomerOrders_AfterSelect(object sender, TreeViewEventArgs e)
         {
-
+            LagerSaldos = null;
             db.SaveChanges();
             if (e.Node.Index < 0) return;
             dataGridView.Columns.Clear();
             dataGridView.Rows.Clear();
             var lagerSaldo = db.LagerSaldo.ToList();
-            var kunder = db.Kunder.ToList();
+            //var kunder = db.Kunder.ToList();
             var böcker = db.Böcker.ToList();
             var orders = db.Orders.ToList();
-            var butiker = db.Butiker.Include(b => b.LagerSaldos).ToList();
+            //var butiker = db.Butiker.Include(b => b.LagerSaldos).ToList();
             Författare = db.Författare.ToList();
-            var förlag = db.Förlag.ToList();
+            //var förlag = db.Förlag.ToList();
             var författarePerBok = db.FörfattareBöckerFörlags;
-            var orderDetaljer = db.Orderdetaljer.ToList();
+            //var orderDetaljer = db.Orderdetaljer.ToList();
 
             switch (e.Node.Tag)
             {
@@ -270,37 +277,44 @@ namespace Bokhandel.Forms
                 var node = treeViewCustomerOrders.GetNodeAt(e.X, e.Y);
                 treeViewCustomerOrders.SelectedNode = node;
 
+                toolStripMenuItemAddBook.Visible = false;
+                toolStripMenuItemDelete.Visible = false;
+                toolStripMenuItemAddFörfattare.Visible = false;
+                toolStripMenuItemAddButik.Visible = false;
+                toolStripMenuItemAddKund.Visible = false;
+
+
                 // TODO: Gör en switchcase med respektive funtion ex; Add order till kunder, add book till författare
                 switch (node.Tag)
                 {
                     case Kunder _:
-                        toolStripMenuItemDelete.Visible = false;
                         break;
                     case Butiker butik:
-                        if (butik.LagerSaldos.Count == böcker.Count)
+                        if (butik.LagerSaldos.Count != böcker.Count)
                         {
-                            toolStripMenuItemAddRow.Visible = false;
+                            toolStripMenuItemAddBook.Visible = true;
                         }
                         break;
                     case Författare person:
-                        if (node.Parent.Tag == "TableNode")
+                        toolStripMenuItemDelete.Visible = true;
+                        break;
+                    case "TableNode":
+                        if (node.Text == "Författare")
                         {
                             toolStripMenuItemAddFörfattare.Visible = true;
                         }
-                        else
+                        else if (node.Text == "Butiker")
                         {
-                            toolStripMenuItemAddFörfattare.Visible = false;
-                            toolStripMenuItemAddRow.Visible = false;
-                            toolStripMenuItemDelete.Visible = false;
+                            toolStripMenuItemAddButik.Visible = true;
+                        }
+                        else if (node.Text == "Kunder")
+                        {
+                            toolStripMenuItemAddKund.Visible = true;
                         }
                         break;
                     default:
-                        toolStripMenuItemAddRow.Visible = true;
-                        toolStripMenuItemDelete.Visible = true;
-                        toolStripMenuItemAddFörfattare.Visible = false;
                         break;
                 }
-
 
                 contextMenuStrip.Show(treeViewCustomerOrders.PointToScreen(new Point(e.X, e.Y)));
             }
@@ -316,8 +330,8 @@ namespace Bokhandel.Forms
             {
                 var bok = comboBoxCell.Value as Böcker;
                 dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
-                dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = bok.Isbn;
                 dataGridView.Rows[e.RowIndex].Cells["Lagersaldo"].Value = 1;
+                dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = bok.Isbn;
             }
 
 
@@ -332,14 +346,13 @@ namespace Bokhandel.Forms
                 }
             }
 
-            if (LagerSaldos != null && dataGridView.Rows[indexOfRow].Cells["ISBN"].Value != null)
+            if (LagerSaldos != null && !ISBNList.Contains(dataGridView.Rows[indexOfRow].Cells["ISBN"].Value) 
+                && dataGridView.Rows[indexOfRow].Cells["ISBN"].Value != null) 
             {
                 LagerSaldos.Isbn = dataGridView.Rows[indexOfRow].Cells["ISBN"].Value.ToString();
                 activeButik.LagerSaldos.Add(LagerSaldos);
-                LagerSaldos = null;
             }
 
-            db.SaveChanges();
         }
 
 
@@ -350,10 +363,8 @@ namespace Bokhandel.Forms
             comboBoxCell.DisplayMember = "Titel";
             comboBoxCell.ValueMember = "This";
 
-            var ISBNList = new List<string>();
             var lagerSaldoLista = butik.LagerSaldos.ToList();
-
-            var butikEtt = butiker[1];
+            ISBNList.Clear();
 
             foreach (var lagerSaldo in lagerSaldoLista)
             {
@@ -371,11 +382,11 @@ namespace Bokhandel.Forms
 
             return comboBoxCell;
         }
-        private void toolStripMenuItemAddRow_Click(object sender, EventArgs e)
+        private void toolStripMenuItemAddBook_Click(object sender, EventArgs e)
         {
             if (activeButik == null)
                 return;
-
+            // TODO: Mellanlagra objekten så att man kan ändra flera celler samtidigt.
 
             var node = treeViewCustomerOrders.SelectedNode;
             LagerSaldos = new LagerSaldo()
@@ -393,6 +404,12 @@ namespace Bokhandel.Forms
                 dataGridView.Rows[indexOfRow].Tag = LagerSaldos;
 
                 var comboBoxCell = PopulateComboBoxCell(indexOfRow, butik);
+                comboBoxCell.Value = comboBoxCell.Items[0];
+
+                var bok = comboBoxCell.Value as Böcker;
+                dataGridView.Rows[indexOfRow].Cells["ISBN"].Value = bok.Isbn;
+                dataGridView.Rows[indexOfRow].Cells["Pris"].Value = bok.Pris.ToString("0.##");
+                dataGridView.Rows[indexOfRow].Cells["Lagersaldo"].Value = 1;
 
             }
         }
@@ -419,8 +436,6 @@ namespace Bokhandel.Forms
             if (dataGridView.SelectedCells != null)
             {
                 selectedCellItems = dataGridView.SelectedCells;
-
-
             }
             foreach (DataGridViewCell cell in selectedCellItems)
             {

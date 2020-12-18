@@ -36,9 +36,11 @@ namespace Bokhandel.Forms
             this.buttonDelete = new System.Windows.Forms.Button();
             this.dataGridView = new System.Windows.Forms.DataGridView();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toolStripMenuItemAddRow = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemAddBook = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAddFörfattare = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemDelete = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemAddButik = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemAddKund = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -129,24 +131,27 @@ namespace Bokhandel.Forms
             // contextMenuStrip
             // 
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItemAddRow,
+            this.toolStripMenuItemAddBook,
             this.toolStripMenuItemAddFörfattare,
-            this.toolStripMenuItemDelete});
+            this.toolStripMenuItemDelete,
+            this.toolStripMenuItemAddButik,
+            this.toolStripMenuItemAddKund});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(151, 70);
+            this.contextMenuStrip.Size = new System.Drawing.Size(151, 114);
             // 
-            // toolStripMenuItemAddRow
+            // toolStripMenuItemAddBook
             // 
-            this.toolStripMenuItemAddRow.Name = "toolStripMenuItemAddRow";
-            this.toolStripMenuItemAddRow.Size = new System.Drawing.Size(150, 22);
-            this.toolStripMenuItemAddRow.Text = "Add Row";
-            this.toolStripMenuItemAddRow.Click += new System.EventHandler(this.toolStripMenuItemAddRow_Click);
+            this.toolStripMenuItemAddBook.Name = "toolStripMenuItemAddBook";
+            this.toolStripMenuItemAddBook.Size = new System.Drawing.Size(150, 22);
+            this.toolStripMenuItemAddBook.Text = "Add Book";
+            this.toolStripMenuItemAddBook.Click += new System.EventHandler(this.toolStripMenuItemAddBook_Click);
             // 
             // toolStripMenuItemAddFörfattare
             // 
             this.toolStripMenuItemAddFörfattare.Name = "toolStripMenuItemAddFörfattare";
             this.toolStripMenuItemAddFörfattare.Size = new System.Drawing.Size(150, 22);
             this.toolStripMenuItemAddFörfattare.Text = "Add Författare";
+            this.toolStripMenuItemAddFörfattare.Visible = false;
             this.toolStripMenuItemAddFörfattare.Click += new System.EventHandler(this.toolStripMenuItemAddFörfattare_Click);
             // 
             // toolStripMenuItemDelete
@@ -154,7 +159,20 @@ namespace Bokhandel.Forms
             this.toolStripMenuItemDelete.Name = "toolStripMenuItemDelete";
             this.toolStripMenuItemDelete.Size = new System.Drawing.Size(150, 22);
             this.toolStripMenuItemDelete.Text = "Delete";
+            this.toolStripMenuItemDelete.Visible = false;
             this.toolStripMenuItemDelete.Click += new System.EventHandler(this.toolStripMenuItemDelete_Click);
+            // 
+            // toolStripMenuItemAddButik
+            // 
+            this.toolStripMenuItemAddButik.Name = "toolStripMenuItemAddButik";
+            this.toolStripMenuItemAddButik.Size = new System.Drawing.Size(150, 22);
+            this.toolStripMenuItemAddButik.Text = "Add Butik";
+            // 
+            // toolStripMenuItemAddKund
+            // 
+            this.toolStripMenuItemAddKund.Name = "toolStripMenuItemAddKund";
+            this.toolStripMenuItemAddKund.Size = new System.Drawing.Size(150, 22);
+            this.toolStripMenuItemAddKund.Text = "Add Kund";
             // 
             // MainForm
             // 
@@ -189,8 +207,10 @@ namespace Bokhandel.Forms
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDelete;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddRow;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddBook;
         private System.Windows.Forms.Button buttonDelete;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddFörfattare;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddButik;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddKund;
     }
 }
