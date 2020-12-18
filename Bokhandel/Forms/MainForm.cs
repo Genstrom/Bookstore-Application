@@ -267,6 +267,9 @@ namespace Bokhandel.Forms
         {
             if (e.Button == MouseButtons.Right)
             {
+                toolStripMenuItemAddFörfattare.Visible = false;
+                toolStripMenuItemDelete.Visible = false;
+                toolStripMenuItemAddRow.Visible = false;
                 var node = treeViewCustomerOrders.GetNodeAt(e.X, e.Y);
                 treeViewCustomerOrders.SelectedNode = node;
 
@@ -274,12 +277,12 @@ namespace Bokhandel.Forms
                 switch (node.Tag)
                 {
                     case Kunder _:
-                        toolStripMenuItemDelete.Visible = false;
+                        //toolStripMenuItemDelete.Visible = false;
                         break;
                     case Butiker butik:
-                        if (butik.LagerSaldos.Count == böcker.Count)
+                        if (butik.LagerSaldos.Count != böcker.Count)
                         {
-                            toolStripMenuItemAddRow.Visible = false;
+                            toolStripMenuItemAddRow.Visible = true;
                         }
                         break;
                     case Författare person:
@@ -289,15 +292,14 @@ namespace Bokhandel.Forms
                         }
                         else
                         {
-                            toolStripMenuItemAddFörfattare.Visible = false;
                             toolStripMenuItemAddRow.Visible = false;
-                            toolStripMenuItemDelete.Visible = false;
+                            
                         }
                         break;
                     default:
                         toolStripMenuItemAddRow.Visible = true;
                         toolStripMenuItemDelete.Visible = true;
-                        toolStripMenuItemAddFörfattare.Visible = false;
+                        //toolStripMenuItemAddFörfattare.Visible = false;
                         break;
                 }
 
