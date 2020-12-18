@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace Bokhandel
 {
-    [DebuggerDisplay("{ButiksId} x {Isbn}")]
+    [DebuggerDisplay("{ButiksId} x {IsbnNavigation}")]
     public class LagerSaldo
     {
         public int ButiksId { get; set; }

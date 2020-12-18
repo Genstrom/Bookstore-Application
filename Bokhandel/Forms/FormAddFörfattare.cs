@@ -18,5 +18,10 @@ namespace Bokhandel.Forms
         }
 
         public List<Författare> Författare { get; set; }
+
+        private void FormAddFörfattare_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

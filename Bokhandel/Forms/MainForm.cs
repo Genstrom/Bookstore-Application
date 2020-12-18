@@ -19,7 +19,7 @@ namespace Bokhandel.Forms
         private List<String> ISBNList = new List<String>();
         private int indexOfRow = 0;
 
-        public List<Författare> Författare { get; set; }
+        private List<Författare> Författare { get; set; }
         public MainForm()
         {
             InitializeComponent();
@@ -158,14 +158,10 @@ namespace Bokhandel.Forms
             dataGridView.Columns.Clear();
             dataGridView.Rows.Clear();
             var lagerSaldo = db.LagerSaldo.ToList();
-            //var kunder = db.Kunder.ToList();
-            var böcker = db.Böcker.ToList();
+            böcker = db.Böcker.ToList();
             var orders = db.Orders.ToList();
-            //var butiker = db.Butiker.Include(b => b.LagerSaldos).ToList();
             Författare = db.Författare.ToList();
-            //var förlag = db.Förlag.ToList();
             var författarePerBok = db.FörfattareBöckerFörlags;
-            //var orderDetaljer = db.Orderdetaljer.ToList();
 
             switch (e.Node.Tag)
             {
@@ -175,11 +171,6 @@ namespace Bokhandel.Forms
                         dataGridView.Rows.Clear();
                         dataGridView.Columns.Clear();
                         dataGridView.Columns.Add("ISBN", "ISBN");
-                        //var titelColumn = new DataGridViewComboBoxColumn
-                        //{
-                        //    Name = "Titel",
-                        //    HeaderText = "Titel",
-                        //};
                         dataGridView.Columns.Add("Titel", "Titel");
                         dataGridView.Columns.Add("Lagersaldo", "Lagersaldo");
                         dataGridView.Columns.Add("Pris", "Pris");
@@ -190,7 +181,6 @@ namespace Bokhandel.Forms
                                     {
                                         int rowIndex = dataGridView.Rows.Add(bok.Isbn, bok, saldo.Antal, bok.Pris.ToString("0.##"));
                                         dataGridView.Rows[rowIndex].Tag = saldo;
-                                        //var comboBoxCell = PopulateComboBoxCell(rowIndex, activeButik);
                                         dataGridView.Rows[rowIndex].Cells["ISBN"].Value = bok.Isbn;
                                         dataGridView.Rows[rowIndex].Cells["Titel"].Value = bok.Titel;
                                         dataGridView.Rows[rowIndex].Cells["Lagersaldo"].Value = saldo.Antal;
@@ -325,6 +315,7 @@ namespace Bokhandel.Forms
             if (e.RowIndex < 0) return;
 
             var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
 
             if (cell is DataGridViewComboBoxCell comboBoxCell)
             {
@@ -332,56 +323,18 @@ namespace Bokhandel.Forms
                 dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
                 dataGridView.Rows[e.RowIndex].Cells["Lagersaldo"].Value = 1;
                 dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = bok.Isbn;
-            }
 
-
-            if (e.ColumnIndex == dataGridView.Columns["Lagersaldo"].DisplayIndex)
-            {
-                var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
-
-                if (Int32.TryParse(cell.Value.ToString(), out int result))
+                lagerSaldo.Isbn = bok.Isbn;
+                lagerSaldo.IsbnNavigation = bok;
+                lagerSaldo.Antal = 1;
+                lagerSaldo.Butiks = activeButik;
+                if (!activeButik.LagerSaldos.Contains(lagerSaldo))
                 {
-                    lagerSaldo.Antal = result;
-
+                    activeButik.LagerSaldos.Add(lagerSaldo);
                 }
             }
-
-            if (LagerSaldos != null && !ISBNList.Contains(dataGridView.Rows[indexOfRow].Cells["ISBN"].Value) 
-                && dataGridView.Rows[indexOfRow].Cells["ISBN"].Value != null) 
-            {
-                LagerSaldos.Isbn = dataGridView.Rows[indexOfRow].Cells["ISBN"].Value.ToString();
-                activeButik.LagerSaldos.Add(LagerSaldos);
-            }
-
         }
 
-
-        private DataGridViewComboBoxCell PopulateComboBoxCell(int rowIndex, Butiker butik)
-        {
-            var comboBoxCell = dataGridView.Rows[rowIndex].Cells["Titel"] as DataGridViewComboBoxCell;
-            comboBoxCell.ValueType = typeof(Bokhandel.Böcker);
-            comboBoxCell.DisplayMember = "Titel";
-            comboBoxCell.ValueMember = "This";
-
-            var lagerSaldoLista = butik.LagerSaldos.ToList();
-            ISBNList.Clear();
-
-            foreach (var lagerSaldo in lagerSaldoLista)
-            {
-                ISBNList.Add(lagerSaldo.Isbn);
-            }
-
-
-            foreach (var bok in böcker)
-            {
-                if (!ISBNList.Contains(bok.Isbn))
-                {
-                    comboBoxCell.Items.Add(bok.This);
-                }
-            }
-
-            return comboBoxCell;
-        }
         private void toolStripMenuItemAddBook_Click(object sender, EventArgs e)
         {
             if (activeButik == null)
@@ -392,7 +345,6 @@ namespace Bokhandel.Forms
             LagerSaldos = new LagerSaldo()
             {
                 ButiksId = activeButik.Id
-
             };
 
 
@@ -432,7 +384,6 @@ namespace Bokhandel.Forms
             DataGridViewSelectedCellCollection selectedCellItems = null;
 
 
-
             if (dataGridView.SelectedCells != null)
             {
                 selectedCellItems = dataGridView.SelectedCells;
@@ -450,9 +401,18 @@ namespace Bokhandel.Forms
 
                     if (result == DialogResult.Yes)
                     {
+                        //ISBNList.Remove(saldo.Isbn);
+
+                        saldo.Butiks.LagerSaldos.Remove(saldo);
+
                         db.Remove(saldo);
 
                         dataGridView.Rows.Remove(selectedRow);
+
+                        if (!saldo.Butiks.LagerSaldos.Contains(saldo))
+                        {
+                            db.SaveChanges();
+                        }
                     }
 
                 }
@@ -460,5 +420,67 @@ namespace Bokhandel.Forms
             }
         }
 
+        private void dataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
+
+            if (cell is DataGridViewComboBoxCell comboBoxCell)
+            {
+                var bok = comboBoxCell.Value as Böcker;
+                dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
+                dataGridView.Rows[e.RowIndex].Cells["Lagersaldo"].Value = 1;
+                dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = bok.Isbn;
+
+                lagerSaldo.Isbn = bok.Isbn;
+                lagerSaldo.IsbnNavigation = bok;
+                if (!activeButik.LagerSaldos.Contains(lagerSaldo))
+                {
+                    activeButik.LagerSaldos.Add(lagerSaldo);
+                }
+                else
+                {
+                    MessageBox.Show("Samma bok idiot");
+                    comboBoxCell.Value = comboBoxCell.Items[0];
+                }
+            }
+
+            if (e.ColumnIndex == dataGridView.Columns["Lagersaldo"].DisplayIndex)
+            {
+
+                if (Int32.TryParse(cell.Value.ToString(), out int result))
+                {
+                    lagerSaldo.Antal = result;
+                }
+            }
+        }
+        private DataGridViewComboBoxCell PopulateComboBoxCell(int rowIndex, Butiker butik)
+        {
+            var comboBoxCell = dataGridView.Rows[rowIndex].Cells["Titel"] as DataGridViewComboBoxCell;
+            comboBoxCell.ValueType = typeof(Böcker);
+            comboBoxCell.DisplayMember = "Titel";
+            comboBoxCell.ValueMember = "This";
+
+            var lagerSaldoLista = butik.LagerSaldos.ToList();
+            ISBNList.Clear();
+
+            foreach (var lagerSaldo in lagerSaldoLista)
+            {
+                ISBNList.Add(lagerSaldo.Isbn);
+            }
+
+
+            foreach (var bok in böcker)
+            {
+                if (!ISBNList.Contains(bok.Isbn))
+                {
+                    comboBoxCell.Items.Add(bok.This);
+                }
+            }
+
+            return comboBoxCell;
+        }
     }
 }
