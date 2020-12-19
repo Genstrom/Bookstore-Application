@@ -401,16 +401,15 @@ namespace Bokhandel.Forms
 
                     if (result == DialogResult.Yes)
                     {
-                        //ISBNList.Remove(saldo.Isbn);
 
                         saldo.Butiks.LagerSaldos.Remove(saldo);
 
-                        db.Remove(saldo);
-
                         dataGridView.Rows.Remove(selectedRow);
 
-                        if (!saldo.Butiks.LagerSaldos.Contains(saldo))
+                        if (db.LagerSaldo.Any(ls => ls.ButiksId == saldo.ButiksId && ls.Isbn == saldo.Isbn)) //Checks the database if row exists before trying to save to avoid UpdateConcurrencyException
                         {
+                            ISBNList.Remove(saldo.Isbn);
+                            db.Remove(saldo);
                             db.SaveChanges();
                         }
                     }
@@ -442,7 +441,6 @@ namespace Bokhandel.Forms
                 }
                 else
                 {
-                    MessageBox.Show("Samma bok idiot");
                     comboBoxCell.Value = comboBoxCell.Items[0];
                 }
             }
