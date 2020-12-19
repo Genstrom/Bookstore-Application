@@ -13,13 +13,13 @@ namespace Bokhandel.Forms
     {
         private BokhandelContext db = new BokhandelContext();
         private List<Böcker> böcker;
-        private List<Butiker> butiker;
+        private List<Butiker> butiker; 
         private Butiker activeButik = null;
         private LagerSaldo LagerSaldos = null;
         private List<String> ISBNList = new List<String>();
         private int indexOfRow = 0;
 
-        private List<Författare> Författare { get; set; }
+        protected List<Författare> Författare { get; set; }
         public MainForm()
         {
             InitializeComponent();
@@ -339,7 +339,6 @@ namespace Bokhandel.Forms
         {
             if (activeButik == null)
                 return;
-            // TODO: Mellanlagra objekten så att man kan ändra flera celler samtidigt.
 
             var node = treeViewCustomerOrders.SelectedNode;
             LagerSaldos = new LagerSaldo()
@@ -367,7 +366,7 @@ namespace Bokhandel.Forms
         }
         private void toolStripMenuItemAddFörfattare_Click(object sender, EventArgs e)
         {
-            var form = new FormAddFörfattare(Författare);
+            var form = new FormAddFörfattare(Författare, db);
             form.ShowDialog();
         }
 
@@ -435,7 +434,7 @@ namespace Bokhandel.Forms
 
                 lagerSaldo.Isbn = bok.Isbn;
                 lagerSaldo.IsbnNavigation = bok;
-                if (!activeButik.LagerSaldos.Contains(lagerSaldo))
+                if (!activeButik.LagerSaldos.Contains(lagerSaldo)) 
                 {
                     activeButik.LagerSaldos.Add(lagerSaldo);
                 }
