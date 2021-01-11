@@ -85,9 +85,13 @@ namespace Bokhandel
 
             modelBuilder.Entity<Författare>(entity =>
             {
+                entity.HasKey(f => f.FörfattareId);
+
                 entity.ToTable("Författare");
 
-                entity.Property(e => e.FörfattareId).HasColumnName("FörfattareID");
+                entity.Property(e => e.FörfattareId)
+                .HasColumnName("FörfattareID")
+                .UseIdentityColumn(1, 1);
 
                 entity.Property(e => e.Efternamn)
                     .IsRequired()

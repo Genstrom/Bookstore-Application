@@ -423,7 +423,9 @@ namespace Bokhandel.Forms
             if (e.RowIndex < 0) return;
 
             var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            var thisRow = dataGridView.Rows[e.RowIndex];
             var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
+            var rows = dataGridView.Rows;
 
             if (cell is DataGridViewComboBoxCell comboBoxCell)
             {
@@ -438,10 +440,16 @@ namespace Bokhandel.Forms
                 {
                     activeButik.LagerSaldos.Add(lagerSaldo);
                 }
-                else
+
+                foreach (DataGridViewRow row in rows)
                 {
-                    comboBoxCell.Value = comboBoxCell.Items[0];
+                    if (comboBoxCell.Value == row.Cells[1].Value && comboBoxCell.RowIndex != row.Index) //Compare the value from the combobox with the rest of the rows.
+                    {
+                        comboBoxCell.Value = comboBoxCell.Items[0];
+                    }
                 }
+
+                
             }
 
             if (e.ColumnIndex == dataGridView.Columns["Lagersaldo"].DisplayIndex)

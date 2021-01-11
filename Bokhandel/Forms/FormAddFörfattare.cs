@@ -1,14 +1,8 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using Bokhandel.Models;
-
+using Microsoft.EntityFrameworkCore.Metadata;
 namespace Bokhandel.Forms
 {
     public partial class FormAddFörfattare : Form
@@ -40,10 +34,33 @@ namespace Bokhandel.Forms
             var entityBöcker = Db.Model.FindEntityType(typeof(Böcker));
 
 
-            foreach (var property in entityFörfattare.GetProperties())
+            dataGridViewFörfattare.RowTemplate.MinimumHeight = 66;
+            dataGridViewBok.RowTemplate.MinimumHeight = 40;
+
+            IProperty förnamn = null;
+            IProperty efternamn = null;
+            IProperty födelsedatum = null;
+
+            foreach (var property in entityFörfattare.GetProperties()) //Fulfix för att få kolumnerna i rätt ordning
             {
-                dataGridViewFörfattare.Rows.Add(property.GetColumnName());
+                if (property.GetColumnName() == "Förnamn")
+                {
+                    förnamn = property;
+                }
+                else if (property.GetColumnName() == "Efternamn")
+                {
+                    efternamn = property;
+                }
+                else if (property.GetColumnName() == "Födelsedatum")
+                {
+                    födelsedatum = property;
+                }
             }
+
+            dataGridViewFörfattare.Rows.Add(förnamn.Name);
+            dataGridViewFörfattare.Rows.Add(efternamn.Name);
+            dataGridViewFörfattare.Rows.Add(födelsedatum.Name);
+
 
             foreach (var property in entityBöcker.GetProperties())
             {
@@ -54,6 +71,29 @@ namespace Bokhandel.Forms
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
+            Close();
+        }
+
+        private void buttonSave_Click(object sender, EventArgs e)
+        {
+            var userInput = new string[dataGridViewFörfattare.Rows.Count];
+
+            for (int i = 0; i < dataGridViewFörfattare.Rows.Count; i++)
+            {
+                userInput[i] = dataGridViewFörfattare.Rows[i].Cells["Input"].Value.ToString();
+            }
+
+            DateTime.TryParse(userInput[2], out DateTime result);
+
+            var nyFörfattare = new Författare()
+            {
+                Förnamn = userInput[0],
+                Efternamn = userInput[1],
+                Födelsedatum = result
+            };
+
+            Db.Författare.Add(nyFörfattare);
+            //Db.SaveChanges();
             Close();
         }
     }
