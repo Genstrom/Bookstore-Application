@@ -354,7 +354,7 @@ namespace Bokhandel.Forms
                 dataGridView.Rows[indexOfRow].Cells[1] = new DataGridViewComboBoxCell();
                 dataGridView.Rows[indexOfRow].Tag = LagerSaldos;
 
-                var comboBoxCell = PopulateComboBoxCell(indexOfRow, butik);
+                var comboBoxCell = PopulateStoreComboBoxCell(indexOfRow, butik);
                 comboBoxCell.Value = comboBoxCell.Items[0];
 
                 var bok = comboBoxCell.Value as Böcker;
@@ -452,16 +452,16 @@ namespace Bokhandel.Forms
                 
             }
 
-            if (e.ColumnIndex == dataGridView.Columns["Lagersaldo"].DisplayIndex)
-            {
+            if (e.ColumnIndex != dataGridView.Columns["Lagersaldo"]?.DisplayIndex)
+                return;
 
-                if (Int32.TryParse(cell.Value.ToString(), out int result))
-                {
-                    lagerSaldo.Antal = result;
-                }
+            if (Int32.TryParse(cell.Value.ToString(), out int result))
+            {
+                lagerSaldo.Antal = result;
             }
+
         }
-        private DataGridViewComboBoxCell PopulateComboBoxCell(int rowIndex, Butiker butik)
+        private DataGridViewComboBoxCell PopulateStoreComboBoxCell(int rowIndex, Butiker butik)
         {
             var comboBoxCell = dataGridView.Rows[rowIndex].Cells["Titel"] as DataGridViewComboBoxCell;
             comboBoxCell.ValueType = typeof(Böcker);
