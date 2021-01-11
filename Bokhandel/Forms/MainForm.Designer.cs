@@ -41,6 +41,7 @@ namespace Bokhandel.Forms
             this.toolStripMenuItemDelete = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAddButik = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAddKund = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemNyBok = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -134,11 +135,12 @@ namespace Bokhandel.Forms
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemAddBook,
             this.toolStripMenuItemAddFörfattare,
+            this.toolStripMenuItemNyBok,
             this.toolStripMenuItemDelete,
             this.toolStripMenuItemAddButik,
             this.toolStripMenuItemAddKund});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(151, 114);
+            this.contextMenuStrip.Size = new System.Drawing.Size(151, 136);
             // 
             // toolStripMenuItemAddBook
             // 
@@ -174,6 +176,13 @@ namespace Bokhandel.Forms
             this.toolStripMenuItemAddKund.Name = "toolStripMenuItemAddKund";
             this.toolStripMenuItemAddKund.Size = new System.Drawing.Size(150, 22);
             this.toolStripMenuItemAddKund.Text = "Add Kund";
+            // 
+            // toolStripMenuItemNyBok
+            // 
+            this.toolStripMenuItemNyBok.Name = "toolStripMenuItemNyBok";
+            this.toolStripMenuItemNyBok.Size = new System.Drawing.Size(150, 22);
+            this.toolStripMenuItemNyBok.Text = "Ny Bok";
+            this.toolStripMenuItemNyBok.Click += new System.EventHandler(this.toolStripMenuItemNyBok_Click);
             // 
             // MainForm
             // 
@@ -213,5 +222,6 @@ namespace Bokhandel.Forms
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddFörfattare;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddButik;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddKund;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemNyBok;
     }
 }
