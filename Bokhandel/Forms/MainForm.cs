@@ -13,11 +13,13 @@ namespace Bokhandel.Forms
     {
         private BokhandelContext db = new BokhandelContext();
         private List<Böcker> böcker;
-        private List<Butiker> butiker; 
+        private List<Butiker> butiker;
         private Butiker activeButik = null;
         private LagerSaldo LagerSaldos = null;
         private List<String> ISBNList = new List<String>();
         private int indexOfRow = 0;
+        private bool isButik = false;
+        private bool isFörfattare = false;
 
         protected List<Författare> Författare { get; set; }
         public MainForm()
@@ -162,11 +164,14 @@ namespace Bokhandel.Forms
             var orders = db.Orders.ToList();
             Författare = db.Författare.ToList();
             var författarePerBok = db.FörfattareBöckerFörlags;
+            isButik = false;
+            isFörfattare = false;
 
             switch (e.Node.Tag)
             {
                 case Butiker butik:
                     {
+                        isButik = true;
                         activeButik = butik;
                         dataGridView.Rows.Clear();
                         dataGridView.Columns.Clear();
@@ -192,18 +197,20 @@ namespace Bokhandel.Forms
                     }
                 case Författare person:
                     {
+                        isFörfattare = true;
                         activeButik = null;
                         dataGridView.Rows.Clear();
                         dataGridView.Columns.Clear();
                         dataGridView.Columns.Add("ISBN", "ISBN");
                         dataGridView.Columns.Add("Titel", "Titel");
                         dataGridView.Columns.Add("Språk", "Språk");
+                        dataGridView.Columns.Add("Pris", "Pris");
                         dataGridView.Columns.Add("Utgivningsdatum", "Utgivningsdatum");
                         foreach (var bokFörfattare in författarePerBok)
                             foreach (var bok in böcker)
                                 if (person.FörfattareId == bokFörfattare.FörfattareId)
                                     if (bok.Isbn == bokFörfattare.Isbn)
-                                        dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Utgivningsdatum);
+                                        dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Pris.ToString("0.##"), bok.Utgivningsdatum.ToShortDateString());
 
                         break;
                     }
@@ -272,6 +279,7 @@ namespace Bokhandel.Forms
                 toolStripMenuItemAddFörfattare.Visible = false;
                 toolStripMenuItemAddButik.Visible = false;
                 toolStripMenuItemAddKund.Visible = false;
+                toolStripMenuItemNyBok.Visible = false;
 
 
                 // TODO: Gör en switchcase med respektive funtion ex; Add order till kunder, add book till författare
@@ -286,6 +294,7 @@ namespace Bokhandel.Forms
                         }
                         break;
                     case Författare person:
+                        toolStripMenuItemNyBok.Visible = true;
                         toolStripMenuItemDelete.Visible = true;
                         break;
                     case "TableNode":
@@ -364,6 +373,14 @@ namespace Bokhandel.Forms
 
             }
         }
+        private void toolStripMenuItemNyBok_Click(object sender, EventArgs e)
+        {
+            var node = treeViewCustomerOrders.SelectedNode;
+            if (!(node.Tag is Författare författare)) return;
+
+            indexOfRow = dataGridView.Rows.Add();
+
+        }
         private void toolStripMenuItemAddFörfattare_Click(object sender, EventArgs e)
         {
             var form = new FormAddFörfattare(Författare, db);
@@ -422,6 +439,44 @@ namespace Bokhandel.Forms
         {
             if (e.RowIndex < 0) return;
 
+            if (isButik)
+            {
+                AddBookToStore(e);
+            }
+            else if (isFörfattare)
+            {
+                AddNewBookToFörfattare(e);
+            }
+            else
+            {
+                return; //lägg till andra checks om du vill kunna lägga till kunder etc etc.
+            }
+
+        }
+
+        private void AddNewBookToFörfattare(DataGridViewCellEventArgs e)
+        {
+            string ISBN = "";
+            string titel = "";
+            string språk = "";
+            decimal pris = 0;
+            DateTime utgivningsdatum = new DateTime();
+
+
+            var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            var thisRow = dataGridView.Rows[e.RowIndex];
+            var bok = dataGridView.Rows[e.RowIndex].Tag as Böcker;
+
+            dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = ISBN;
+            dataGridView.Rows[e.RowIndex].Cells["Titel"].Value = titel;
+            dataGridView.Rows[e.RowIndex].Cells["Språk"].Value = språk;
+            dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = pris;
+            dataGridView.Rows[e.RowIndex].Cells["Utgivningsdatum"].Value = utgivningsdatum;
+
+        }
+
+        private void AddBookToStore(DataGridViewCellEventArgs e)
+        {
             var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
             var thisRow = dataGridView.Rows[e.RowIndex];
             var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
@@ -436,7 +491,7 @@ namespace Bokhandel.Forms
 
                 lagerSaldo.Isbn = bok.Isbn;
                 lagerSaldo.IsbnNavigation = bok;
-                if (!activeButik.LagerSaldos.Contains(lagerSaldo)) 
+                if (!activeButik.LagerSaldos.Contains(lagerSaldo))
                 {
                     activeButik.LagerSaldos.Add(lagerSaldo);
                 }
@@ -448,19 +503,17 @@ namespace Bokhandel.Forms
                         comboBoxCell.Value = comboBoxCell.Items[0];
                     }
                 }
-
-                
             }
 
-            if (e.ColumnIndex == dataGridView.Columns["Lagersaldo"].DisplayIndex)
-            {
+            if (e.ColumnIndex != dataGridView.Columns["Lagersaldo"]?.DisplayIndex) return;
 
-                if (Int32.TryParse(cell.Value.ToString(), out int result))
-                {
-                    lagerSaldo.Antal = result;
-                }
+
+            if (Int32.TryParse(cell.Value.ToString(), out int result))
+            {
+                lagerSaldo.Antal = result;
             }
         }
+
         private DataGridViewComboBoxCell PopulateComboBoxCell(int rowIndex, Butiker butik)
         {
             var comboBoxCell = dataGridView.Rows[rowIndex].Cells["Titel"] as DataGridViewComboBoxCell;
@@ -487,5 +540,6 @@ namespace Bokhandel.Forms
 
             return comboBoxCell;
         }
+
     }
 }
