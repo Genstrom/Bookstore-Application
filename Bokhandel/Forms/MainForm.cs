@@ -467,11 +467,31 @@ namespace Bokhandel.Forms
             var thisRow = dataGridView.Rows[e.RowIndex];
             var bok = dataGridView.Rows[e.RowIndex].Tag as Böcker;
 
-            dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = ISBN;
-            dataGridView.Rows[e.RowIndex].Cells["Titel"].Value = titel;
-            dataGridView.Rows[e.RowIndex].Cells["Språk"].Value = språk;
-            dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = pris;
-            dataGridView.Rows[e.RowIndex].Cells["Utgivningsdatum"].Value = utgivningsdatum;
+            ISBN = dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value?.ToString();
+            titel = dataGridView.Rows[e.RowIndex].Cells["Titel"].Value?.ToString();
+            språk = dataGridView.Rows[e.RowIndex].Cells["Språk"].Value?.ToString();
+
+
+            pris = Convert.ToDecimal(dataGridView.Rows[e.RowIndex].Cells["Pris"].Value);
+            utgivningsdatum = Convert.ToDateTime(dataGridView.Rows[e.RowIndex].Cells["Utgivningsdatum"].Value);
+
+            if (ISBN != null &&
+                titel != null &&
+                språk != null &&
+                pris != 0 &&
+                utgivningsdatum != DateTime.MinValue)
+            {
+                var nyBok = new Böcker()
+                {
+                    Isbn = ISBN,
+                    Titel = titel,
+                    Språk = språk,
+                    Pris = pris,
+                    Utgivningsdatum = utgivningsdatum
+                };
+
+                db.Böcker.Add(nyBok);
+            }
 
         }
 
