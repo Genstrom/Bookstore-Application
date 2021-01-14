@@ -20,5 +20,7 @@ namespace Bokhandel
         public string Telefonnummer { get; set; }
 
         public virtual ICollection<FörfattareBöckerFörlag> FörfattareBöckerFörlags { get; set; }
+
+        public object This { get { return this; } }
     }
 }

@@ -22,6 +22,7 @@ namespace Bokhandel.Forms
         private bool isFörfattare = false;
 
         protected List<Författare> Författare { get; set; }
+        protected List<Förlag> Förlag { get; set; }
         public MainForm()
         {
             InitializeComponent();
@@ -37,7 +38,7 @@ namespace Bokhandel.Forms
                 var orders = db.Orders.Include(od => od.Orderdetaljers).ToList();
                 butiker = db.Butiker.Include(l => l.LagerSaldos).ToList();
                 var författare = db.Författare.ToList();
-                var förlag = db.Förlag.ToList();
+                Förlag = db.Förlag.ToList();
                 var tableNames = db.Model.GetEntityTypes();
                 var tableList = tableNames.ToList();
 
@@ -93,7 +94,7 @@ namespace Bokhandel.Forms
                             break;
 
                         case "Förlag":
-                            foreach (var förlaget in förlag)
+                            foreach (var förlaget in Förlag)
                             {
                                 var förlagsNode = new TreeNode
                                 {
@@ -383,7 +384,7 @@ namespace Bokhandel.Forms
         }
         private void toolStripMenuItemAddFörfattare_Click(object sender, EventArgs e)
         {
-            var form = new FormAddFörfattare(Författare, db);
+            var form = new FormAddFörfattare(Författare, Förlag, db);
             form.ShowDialog();
         }
 
