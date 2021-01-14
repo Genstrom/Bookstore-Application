@@ -17,9 +17,9 @@ namespace Bokhandel.Forms
             Db = context;
         }
 
-        public List<Författare> FörfattareList { get; set; }
+        private List<Författare> FörfattareList { get; set; }
 
-        public List<Förlag> FörlagsList { get; set; }
+        private List<Förlag> FörlagsList { get; set; }
         private BokhandelContext Db { get; set; }
 
         [Obsolete]
@@ -61,9 +61,9 @@ namespace Bokhandel.Forms
                 }
             }
 
-            dataGridViewFörfattare.Rows.Add(förnamn.Name);
-            dataGridViewFörfattare.Rows.Add(efternamn.Name);
-            dataGridViewFörfattare.Rows.Add(födelsedatum.Name);
+            dataGridViewFörfattare.Rows.Add(förnamn?.Name);
+            dataGridViewFörfattare.Rows.Add(efternamn?.Name);
+            dataGridViewFörfattare.Rows.Add(födelsedatum?.Name);
             var indexOfRow = dataGridViewFörfattare.Rows.Add("Förlag");
 
             dataGridViewFörfattare.Rows[indexOfRow].Cells["Input"] = new DataGridViewComboBoxCell();
@@ -87,12 +87,12 @@ namespace Bokhandel.Forms
             var userInputFörfattareInfo = new string[dataGridViewFörfattare.Rows.Count];
             var userInputBokInfo = new string[dataGridViewBok.Rows.Count];
 
-            for (int i = 1; i < dataGridViewFörfattare.Rows.Count; i++)
+            for (var i = 1; i < dataGridViewFörfattare.Rows.Count; i++)
             {
                 userInputFörfattareInfo[i - 1] = dataGridViewFörfattare.Rows[i - 1].Cells["Input"].Value.ToString();
             }
 
-            for (int i = 0; i < dataGridViewBok.Rows.Count; i++)
+            for (var i = 0; i < dataGridViewBok.Rows.Count; i++)
             {
                 userInputBokInfo[i] = dataGridViewBok.Rows[i].Cells["Input"].Value.ToString(); //Money blir decimal samt 
             }

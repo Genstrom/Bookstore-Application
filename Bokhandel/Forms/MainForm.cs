@@ -19,10 +19,10 @@ namespace Bokhandel.Forms
         private List<String> ISBNList = new List<String>();
         private int indexOfRow = 0;
         private bool isButik = false;
-        private bool isFörfattare = false;
+        private bool isFörfattare;
 
-        protected List<Författare> Författare { get; set; }
-        protected List<Förlag> Förlag { get; set; }
+        private List<Författare> Författare { get; set; }
+        private List<Förlag> Förlag { get; set; }
         public MainForm()
         {
             InitializeComponent();
@@ -185,7 +185,7 @@ namespace Bokhandel.Forms
                                 if (saldo.ButiksId == butik.Id)
                                     if (bok.Isbn == saldo.Isbn)
                                     {
-                                        int rowIndex = dataGridView.Rows.Add(bok.Isbn, bok, saldo.Antal, bok.Pris.ToString("0.##"));
+                                        var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok, saldo.Antal, bok.Pris.ToString("0.##"));
                                         dataGridView.Rows[rowIndex].Tag = saldo;
                                         dataGridView.Rows[rowIndex].Cells["ISBN"].Value = bok.Isbn;
                                         dataGridView.Rows[rowIndex].Cells["Titel"].Value = bok.Titel;
