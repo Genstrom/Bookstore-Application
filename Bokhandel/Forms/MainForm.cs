@@ -211,8 +211,12 @@ namespace Bokhandel.Forms
                             foreach (var bok in böcker)
                                 if (person.FörfattareId == bokFörfattare.FörfattareId)
                                     if (bok.Isbn == bokFörfattare.Isbn)
-                                        dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Pris.ToString("0.##"), bok.Utgivningsdatum.ToShortDateString());
+                                    {
+                                        var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Pris.ToString("0.##"), bok.Utgivningsdatum.ToShortDateString());
+                                        dataGridView.Rows[rowIndex].Tag = bok;
 
+                                    }
+                                        
                         break;
                     }
                 case Order order:
@@ -405,6 +409,8 @@ namespace Bokhandel.Forms
             {
                 selectedCellItems = dataGridView.SelectedCells;
             }
+          
+           
             foreach (DataGridViewCell cell in selectedCellItems)
             {
                 var selectedRow = dataGridView.Rows[cell.RowIndex];
@@ -431,6 +437,27 @@ namespace Bokhandel.Forms
                         }
                     }
 
+                }
+                else if (dataGridView.Rows[cell.RowIndex].Tag is Böcker bok)
+                {
+                    var result = MessageBox.Show($"Do you want to delete book {bok.Titel}?", "Delete book",
+                        MessageBoxButtons.YesNo
+                    );
+                    if (result == DialogResult.Yes)
+                    {
+                        //bok.FörfattareBöckerFörlags
+                        //var book = context.Blogs.OrderBy(e => e.Name).Include(e => e.Posts).First();
+                        //db.FörfattareBöckerFörlags.Remove(bok);
+                        db.Böcker.Remove(bok);
+                        dataGridView.Rows.Remove(selectedRow);
+                        db.SaveChanges();
+                    }
+                    
+                    
+                }
+                else
+                {
+                    dataGridView.Rows.Remove(selectedRow);
                 }
 
             }
@@ -463,10 +490,6 @@ namespace Bokhandel.Forms
             decimal pris = 0;
             DateTime utgivningsdatum = new DateTime();
 
-
-            var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
-            var thisRow = dataGridView.Rows[e.RowIndex];
-            var bok = dataGridView.Rows[e.RowIndex].Tag as Böcker;
 
             ISBN = dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value?.ToString();
             titel = dataGridView.Rows[e.RowIndex].Cells["Titel"].Value?.ToString();
@@ -506,9 +529,9 @@ namespace Bokhandel.Forms
             if (cell is DataGridViewComboBoxCell comboBoxCell)
             {
                 var bok = comboBoxCell.Value as Böcker;
-                dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
+                dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = bok?.Pris.ToString("0.##");
                 dataGridView.Rows[e.RowIndex].Cells["Lagersaldo"].Value = 1;
-                dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = bok.Isbn;
+                dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = bok?.Isbn;
 
                 lagerSaldo.Isbn = bok.Isbn;
                 lagerSaldo.IsbnNavigation = bok;
@@ -529,7 +552,7 @@ namespace Bokhandel.Forms
             if (e.ColumnIndex != dataGridView.Columns["Lagersaldo"]?.DisplayIndex) return;
 
 
-            if (Int32.TryParse(cell.Value.ToString(), out int result))
+            if (Int32.TryParse(cell.Value.ToString(), out var result))
             {
                 lagerSaldo.Antal = result;
             }

@@ -122,19 +122,19 @@ namespace Bokhandel
                 entity.HasOne(d => d.Författare)
                     .WithMany(p => p.FörfattareBöckerFörlags)
                     .HasForeignKey(d => d.FörfattareId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_FörfattareBöckerFörlag_Författare");
 
                 entity.HasOne(d => d.Förlags)
                     .WithMany(p => p.FörfattareBöckerFörlags)
                     .HasForeignKey(d => d.FörlagsId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_FörfattareBöckerFörlag_Förlag");
 
                 entity.HasOne(d => d.IsbnNavigation)
                     .WithMany(p => p.FörfattareBöckerFörlags)
                     .HasForeignKey(d => d.Isbn)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_FörfattareBöckerFörlag_Böcker");
             });
 
@@ -223,13 +223,13 @@ namespace Bokhandel
                 entity.HasOne(d => d.Butiks)
                     .WithMany(p => p.LagerSaldos)
                     .HasForeignKey(d => d.ButiksId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("LagerSaldoButikerID");
 
                 entity.HasOne(d => d.IsbnNavigation)
                     .WithMany(p => p.LagerSaldos)
                     .HasForeignKey(d => d.Isbn)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_LagerSaldo_Böcker");
             });
 
