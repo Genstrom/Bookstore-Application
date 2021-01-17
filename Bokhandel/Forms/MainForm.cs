@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using Bokhandel.EntityHelperClasses;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Bokhandel.Forms
 {
@@ -20,6 +22,8 @@ namespace Bokhandel.Forms
         private int indexOfRow = 0;
         private bool isButik = false;
         private bool isFörfattare;
+        private Författare activeFörfattare;
+        private int amountOfRows { get; set; }
 
         private List<Författare> Författare { get; set; }
         private List<Förlag> Förlag { get; set; }
@@ -55,103 +59,15 @@ namespace Bokhandel.Forms
                 tableList.Remove(tableList[5]);
 
 
-                foreach (var table in tableList)
-                {
-                    var datum = "";
-                    var tableNodes = new TreeNode()
-                    {
-                        Text = table.DisplayName(),
-                        Tag = "TableNode"
-                    };
-                    treeViewCustomerOrders.Nodes.Add(tableNodes);
-
-                    switch (tableNodes.Text)
-                    {
-                        case "Butiker":
-                            foreach (var butik in butiker)
-                            {
-                                var butikNode = new TreeNode
-                                {
-                                    Text = $"{butik.Namn}, {butik.Adress}",
-                                    Tag = butik
-                                };
-                                tableNodes.Nodes.Add(butikNode);
-                            }
-
-                            break;
-
-                        case "Författare":
-                            foreach (var person in författare)
-                            {
-                                var författarNode = new TreeNode
-                                {
-                                    Text = $"{person.Förnamn}, {person.Efternamn}",
-                                    Tag = person
-                                };
-                                tableNodes.Nodes.Add(författarNode);
-                            }
-
-                            break;
-
-                        case "Förlag":
-                            foreach (var förlaget in Förlag)
-                            {
-                                var förlagsNode = new TreeNode
-                                {
-                                    Text = $"{förlaget.Namn}",
-                                    Tag = förlaget
-                                };
-                                tableNodes.Nodes.Add(förlagsNode);
-                            }
-
-                            break;
-
-                        case "Kunder":
-                            foreach (var kund in kunder)
-                            {
-                                var customerNode = new TreeNode
-                                {
-                                    Text = $"{kund.Förnamn} {kund.Efternamn}",
-                                    Tag = kund
-                                };
-
-                                foreach (var ordrar in kund.Orders)
-                                {
-                                    if (ordrar.Orderdatum.ToString() == datum) continue;
-                                    datum = ordrar.Orderdatum.ToString();
-                                    var orderNode = new TreeNode
-                                    {
-                                        Text = ordrar.Orderdatum.ToString(),
-                                        Tag = ordrar
-                                    };
-                                    customerNode.Nodes.Add(orderNode);
-                                }
-
-                                tableNodes.Nodes.Add(customerNode);
-                            }
-
-                            break;
-
-                        case "Order":
-                            foreach (var order in orders)
-                            {
-                                var orderNode = new TreeNode
-                                {
-                                    Text = $"{order.OrderId}",
-                                    Tag = order
-                                };
-                                tableNodes.Nodes.Add(orderNode);
-                            }
-
-                            break;
-                    }
-                }
+                TreeViewRootPopulator(tableList, författare, kunder, orders);
             }
             else
             {
                 Debug.WriteLine("Failed to Connect");
             }
         }
+
+        
 
         private void treeViewCustomerOrders_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -168,107 +84,33 @@ namespace Bokhandel.Forms
             isButik = false;
             isFörfattare = false;
 
-            switch (e.Node.Tag)
+            PopulateTreeNode(e, lagerSaldo, författarePerBok, orders);
+        }
+        private void treeViewCustomerOrders_BeforeSelect(object sender, TreeViewCancelEventArgs e)
+        {
+            if (isFörfattare)
             {
-                case Butiker butik:
-                    {
-                        isButik = true;
-                        activeButik = butik;
-                        dataGridView.Rows.Clear();
-                        dataGridView.Columns.Clear();
-                        dataGridView.Columns.Add("ISBN", "ISBN");
-                        dataGridView.Columns.Add("Titel", "Titel");
-                        dataGridView.Columns.Add("Lagersaldo", "Lagersaldo");
-                        dataGridView.Columns.Add("Pris", "Pris");
-                        foreach (var bok in böcker)
-                            foreach (var saldo in lagerSaldo)
-                                if (saldo.ButiksId == butik.Id)
-                                    if (bok.Isbn == saldo.Isbn)
-                                    {
-                                        var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok, saldo.Antal, bok.Pris.ToString("0.##"));
-                                        dataGridView.Rows[rowIndex].Tag = saldo;
-                                        dataGridView.Rows[rowIndex].Cells["ISBN"].Value = bok.Isbn;
-                                        dataGridView.Rows[rowIndex].Cells["Titel"].Value = bok.Titel;
-                                        dataGridView.Rows[rowIndex].Cells["Lagersaldo"].Value = saldo.Antal;
-                                        dataGridView.Rows[rowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
-
-                                    }
-
-                        break;
-                    }
-                case Författare person:
-                    {
-                        isFörfattare = true;
-                        activeButik = null;
-                        dataGridView.Rows.Clear();
-                        dataGridView.Columns.Clear();
-                        dataGridView.Columns.Add("ISBN", "ISBN");
-                        dataGridView.Columns.Add("Titel", "Titel");
-                        dataGridView.Columns.Add("Språk", "Språk");
-                        dataGridView.Columns.Add("Pris", "Pris");
-                        dataGridView.Columns.Add("Utgivningsdatum", "Utgivningsdatum");
-                        foreach (var bokFörfattare in författarePerBok)
-                            foreach (var bok in böcker)
-                                if (person.FörfattareId == bokFörfattare.FörfattareId)
-                                    if (bok.Isbn == bokFörfattare.Isbn)
-                                    {
-                                        var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Pris.ToString("0.##"), bok.Utgivningsdatum.ToShortDateString());
-                                        dataGridView.Rows[rowIndex].Tag = bok;
-
-                                    }
-                                        
-                        break;
-                    }
-                case Order order:
-                    {
-                        activeButik = null;
-                        dataGridView.Rows.Clear();
-                        dataGridView.Columns.Clear();
-                        dataGridView.Columns.Add("KundID", "KundID");
-                        dataGridView.Columns.Add("ISBN", "ISBN");
-                        dataGridView.Columns.Add("Titel", "Titel");
-                        dataGridView.Columns.Add("Pris", "Pris");
-                        dataGridView.Columns.Add("Antal", "Antal");
-
-                        foreach (var ordrar in orders)
-                            foreach (var detalj in ordrar.Orderdetaljers)
-                                foreach (var bok in böcker)
-                                    if (detalj.Isbn == bok.Isbn)
-                                        if (order.OrderId == detalj.OrderId)
-                                            dataGridView.Rows.Add(ordrar.KundId, detalj.Isbn, bok.Titel, detalj.Pris, detalj.Antal);
-
-                        break;
-                    }
-                case Förlag förlags:
-                    {
-                        activeButik = null;
-                        dataGridView.Rows.Clear();
-                        dataGridView.Columns.Clear();
-                        dataGridView.Columns.Add("FörlagsID", "FörlagsID");
-                        dataGridView.Columns.Add("Kontaktperson", "Kontaktperson");
-                        dataGridView.Columns.Add("Telefonnummer", "Telefonnummer");
-                        dataGridView.Columns.Add("Titlar", "Titlar");
-                        foreach (var bokFörfattare in författarePerBok)
-                            foreach (var bok in böcker)
-                                if (bokFörfattare.FörlagsId == förlags.FörlagsId)
-                                    if (bokFörfattare.Isbn == bok.Isbn)
-                                        dataGridView.Rows.Add(förlags.FörlagsId, förlags.Kontaktperson, förlags.Telefonnummer,
-                                            bok.Titel);
-
-                        break;
-                    }
-                case Kunder kund:
-                    activeButik = null;
-                    dataGridView.Rows.Clear();
-                    dataGridView.Columns.Clear();
-                    dataGridView.Columns.Add("Id", "Id");
-                    dataGridView.Columns.Add("Namn", "Namn");
-                    dataGridView.Columns.Add("Adress", "Adress");
-                    dataGridView.Columns.Add("Email", "Email");
-                    dataGridView.Columns.Add("Telefonnummer", "Telefonnummer");
-                    dataGridView.Rows.Add(kund.Id, kund.Förnamn + " " + kund.Efternamn, kund.Adress, kund.Epostadress,
-                        kund.Telefonnummer);
-                    break;
+                Förlag förlag = null;
+                if (dataGridView.Rows.Count < 1) return;
+                if (dataGridView.Rows[indexOfRow].Cells[0]  == null) return;
+                 var userInputBokInfo = new string[(dataGridView.Rows.Count-amountOfRows) * 5];
+                 for (var i = 0; i < dataGridView.Rows.Count-amountOfRows; i++)
+                 {
+                     förlag = dataGridView.Rows[i+amountOfRows].Cells["Förlag"].Value as Förlag;
+                 }
+                 for (var j = amountOfRows; j < dataGridView.Rows.Count; j++)
+                 {
+                     for (var i = 0; i < (dataGridView.Rows.Count) * 5; i++)
+                     {
+                         userInputBokInfo[i] = dataGridView.Rows[j].Cells[i].Value.ToString(); 
+                     }
+                     db.Böcker.Add(EntityAdder.AddNyBok(userInputBokInfo));
+                     db.SaveChanges();
+                 
+                     db.FörfattareBöckerFörlags.Add(EntityAdder.AddNyFörfattareBöckerFörlag(userInputBokInfo, förlag, activeFörfattare));
+                     db.SaveChanges();
+                 }
+                 
             }
         }
 
@@ -330,6 +172,7 @@ namespace Bokhandel.Forms
 
             var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
             var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
+            if (isFörfattare) return;
 
             if (cell is DataGridViewComboBoxCell comboBoxCell)
             {
@@ -365,9 +208,9 @@ namespace Bokhandel.Forms
             {
 
                 indexOfRow = dataGridView.Rows.Add();
-                dataGridView.Rows[indexOfRow].Cells[1] = new DataGridViewComboBoxCell();
+                
                 dataGridView.Rows[indexOfRow].Tag = LagerSaldos;
-
+                dataGridView.Rows[indexOfRow].Cells[1] = new DataGridViewComboBoxCell();
                 var comboBoxCell = PopulateComboBoxCell(indexOfRow, butik);
                 comboBoxCell.Value = comboBoxCell.Items[0];
 
@@ -382,8 +225,20 @@ namespace Bokhandel.Forms
         {
             var node = treeViewCustomerOrders.SelectedNode;
             if (!(node.Tag is Författare författare)) return;
+            activeFörfattare = författare;
+
+
 
             indexOfRow = dataGridView.Rows.Add();
+            dataGridView.Rows[indexOfRow].Cells["Förlag"] = new DataGridViewComboBoxCell();
+            var comboBoxCell = dataGridView.Rows[indexOfRow].Cells["Förlag"] as DataGridViewComboBoxCell;
+            comboBoxCell.ValueType = typeof(Förlag);
+            comboBoxCell.DisplayMember = "Namn";
+            comboBoxCell.ValueMember = "This";
+            foreach (var förlag in Förlag)
+            {
+                comboBoxCell.Items.Add(förlag.This);
+            }
 
         }
         private void toolStripMenuItemAddFörfattare_Click(object sender, EventArgs e)
@@ -391,13 +246,18 @@ namespace Bokhandel.Forms
             var form = new FormAddFörfattare(Författare, Förlag, db);
             form.ShowDialog();
         }
-
+        
         private void toolStripMenuItemDelete_Click(object sender, EventArgs e)
         {
             if (treeViewCustomerOrders.SelectedNode.Tag is Böcker)
             {
 
             }
+            if (treeViewCustomerOrders.SelectedNode.Tag is Författare)
+            {
+                
+            }
+            
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)
@@ -470,10 +330,6 @@ namespace Bokhandel.Forms
             if (isButik)
             {
                 AddBookToStore(e);
-            }
-            else if (isFörfattare)
-            {
-                AddNewBookToFörfattare(e);
             }
             else
             {
@@ -584,6 +440,207 @@ namespace Bokhandel.Forms
 
             return comboBoxCell;
         }
+        
+        private void PopulateTreeNode(TreeViewEventArgs e, List<LagerSaldo> lagerSaldo, DbSet<FörfattareBöckerFörlag> författarePerBok, List<Order> orders)
+        {
+            switch (e.Node.Tag)
+            {
+                case Butiker butik:
+                {
+                    isButik = true;
+                    activeButik = butik;
+                    dataGridView.Rows.Clear();
+                    dataGridView.Columns.Clear();
+                    dataGridView.Columns.Add("ISBN", "ISBN");
+                    dataGridView.Columns.Add("Titel", "Titel");
+                    dataGridView.Columns.Add("Lagersaldo", "Lagersaldo");
+                    dataGridView.Columns.Add("Pris", "Pris");
+                    foreach (var bok in böcker)
+                    foreach (var saldo in lagerSaldo)
+                        if (saldo.ButiksId == butik.Id)
+                            if (bok.Isbn == saldo.Isbn)
+                            {
+                                var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok, saldo.Antal, bok.Pris.ToString("0.##"));
+                                dataGridView.Rows[rowIndex].Tag = saldo;
+                                dataGridView.Rows[rowIndex].Cells["ISBN"].Value = bok.Isbn;
+                                dataGridView.Rows[rowIndex].Cells["Titel"].Value = bok.Titel;
+                                dataGridView.Rows[rowIndex].Cells["Lagersaldo"].Value = saldo.Antal;
+                                dataGridView.Rows[rowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
+                            }
 
+                    break;
+                }
+                case Författare person:
+                {
+                    isFörfattare = true;
+                    activeButik = null;
+                    dataGridView.Rows.Clear();
+                    dataGridView.Columns.Clear();
+                    dataGridView.Columns.Add("ISBN", "ISBN");
+                    dataGridView.Columns.Add("Titel", "Titel");
+                    dataGridView.Columns.Add("Språk", "Språk");
+                    dataGridView.Columns.Add("Pris", "Pris");
+                    dataGridView.Columns.Add("Utgivningsdatum", "Utgivningsdatum");
+                    dataGridView.Columns.Add("Förlag", "Förlag");
+                    foreach (var bokFörfattare in författarePerBok)
+                    foreach (var bok in böcker)
+                        if (person.FörfattareId == bokFörfattare.FörfattareId)
+                            if (bok.Isbn == bokFörfattare.Isbn)
+                            {
+                                var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Pris.ToString("0.##"),
+                                    bok.Utgivningsdatum.ToShortDateString(), bokFörfattare.Förlags.Namn);
+                                dataGridView.Rows[rowIndex].Tag = bok;
+                            }
+
+                    amountOfRows = dataGridView.Rows.Count;
+
+                    break;
+                }
+                case Order order:
+                {
+                    activeButik = null;
+                    dataGridView.Rows.Clear();
+                    dataGridView.Columns.Clear();
+                    dataGridView.Columns.Add("KundID", "KundID");
+                    dataGridView.Columns.Add("ISBN", "ISBN");
+                    dataGridView.Columns.Add("Titel", "Titel");
+                    dataGridView.Columns.Add("Pris", "Pris");
+                    dataGridView.Columns.Add("Antal", "Antal");
+
+                    foreach (var ordrar in orders)
+                    foreach (var detalj in ordrar.Orderdetaljers)
+                    foreach (var bok in böcker)
+                        if (detalj.Isbn == bok.Isbn)
+                            if (order.OrderId == detalj.OrderId)
+                                dataGridView.Rows.Add(ordrar.KundId, detalj.Isbn, bok.Titel, detalj.Pris, detalj.Antal);
+
+                    break;
+                }
+                case Förlag förlags:
+                {
+                    activeButik = null;
+                    dataGridView.Rows.Clear();
+                    dataGridView.Columns.Clear();
+                    dataGridView.Columns.Add("FörlagsID", "FörlagsID");
+                    dataGridView.Columns.Add("Kontaktperson", "Kontaktperson");
+                    dataGridView.Columns.Add("Telefonnummer", "Telefonnummer");
+                    dataGridView.Columns.Add("Titlar", "Titlar");
+                    foreach (var bokFörfattare in författarePerBok)
+                    foreach (var bok in böcker)
+                        if (bokFörfattare.FörlagsId == förlags.FörlagsId)
+                            if (bokFörfattare.Isbn == bok.Isbn)
+                                dataGridView.Rows.Add(förlags.FörlagsId, förlags.Kontaktperson, förlags.Telefonnummer,
+                                    bok.Titel);
+
+                    break;
+                }
+                case Kunder kund:
+                    activeButik = null;
+                    dataGridView.Rows.Clear();
+                    dataGridView.Columns.Clear();
+                    dataGridView.Columns.Add("Id", "Id");
+                    dataGridView.Columns.Add("Namn", "Namn");
+                    dataGridView.Columns.Add("Adress", "Adress");
+                    dataGridView.Columns.Add("Email", "Email");
+                    dataGridView.Columns.Add("Telefonnummer", "Telefonnummer");
+                    dataGridView.Rows.Add(kund.Id, kund.Förnamn + " " + kund.Efternamn, kund.Adress, kund.Epostadress,
+                        kund.Telefonnummer);
+                    break;
+            }
+        }
+        private void TreeViewRootPopulator(List<IEntityType> tableList, List<Författare> författare, List<Kunder> kunder, List<Order> orders)
+        {
+            foreach (var table in tableList)
+            {
+                var datum = "";
+                var tableNodes = new TreeNode()
+                {
+                    Text = table.DisplayName(),
+                    Tag = "TableNode"
+                };
+                treeViewCustomerOrders.Nodes.Add(tableNodes);
+
+                switch (tableNodes.Text)
+                {
+                    case "Butiker":
+                        foreach (var butik in butiker)
+                        {
+                            var butikNode = new TreeNode
+                            {
+                                Text = $"{butik.Namn}, {butik.Adress}",
+                                Tag = butik
+                            };
+                            tableNodes.Nodes.Add(butikNode);
+                        }
+
+                        break;
+
+                    case "Författare":
+                        foreach (var person in författare)
+                        {
+                            var författarNode = new TreeNode
+                            {
+                                Text = $"{person.Förnamn}, {person.Efternamn}",
+                                Tag = person
+                            };
+                            tableNodes.Nodes.Add(författarNode);
+                        }
+
+                        break;
+
+                    case "Förlag":
+                        foreach (var förlaget in Förlag)
+                        {
+                            var förlagsNode = new TreeNode
+                            {
+                                Text = $"{förlaget.Namn}",
+                                Tag = förlaget
+                            };
+                            tableNodes.Nodes.Add(förlagsNode);
+                        }
+
+                        break;
+
+                    case "Kunder":
+                        foreach (var kund in kunder)
+                        {
+                            var customerNode = new TreeNode
+                            {
+                                Text = $"{kund.Förnamn} {kund.Efternamn}",
+                                Tag = kund
+                            };
+
+                            foreach (var ordrar in kund.Orders)
+                            {
+                                if (ordrar.Orderdatum.ToString() == datum) continue;
+                                datum = ordrar.Orderdatum.ToString();
+                                var orderNode = new TreeNode
+                                {
+                                    Text = ordrar.Orderdatum.ToString(),
+                                    Tag = ordrar
+                                };
+                                customerNode.Nodes.Add(orderNode);
+                            }
+
+                            tableNodes.Nodes.Add(customerNode);
+                        }
+
+                        break;
+
+                    case "Order":
+                        foreach (var order in orders)
+                        {
+                            var orderNode = new TreeNode
+                            {
+                                Text = $"{order.OrderId}",
+                                Tag = order
+                            };
+                            tableNodes.Nodes.Add(orderNode);
+                        }
+
+                        break;
+                }
+            }
+        }
     }
 }

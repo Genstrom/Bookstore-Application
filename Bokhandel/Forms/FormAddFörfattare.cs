@@ -44,6 +44,7 @@ namespace Bokhandel.Forms
             IProperty förnamn = null;
             IProperty efternamn = null;
             IProperty födelsedatum = null;
+            var rowNames = new string[6]{"ISBN","Titel", "Språk","Pris","Utgivningsdatum","Förlag"};
 
             foreach (var property in entityFörfattare.GetProperties()) //Fulfix för att få kolumnerna i rätt ordning
             {
@@ -70,9 +71,9 @@ namespace Bokhandel.Forms
             var comboBoxCell = PopulateFörfattareComboBoxCell(indexOfRow);
 
 
-            foreach (var property in entityBöcker.GetProperties())
+            foreach (var name in rowNames)
             {
-                dataGridViewBok.Rows.Add(property.GetColumnName());
+                dataGridViewBok.Rows.Add(name);
             }
 
         }
@@ -127,5 +128,6 @@ namespace Bokhandel.Forms
 
             return comboBoxCell;
         }
+        
     }
 }

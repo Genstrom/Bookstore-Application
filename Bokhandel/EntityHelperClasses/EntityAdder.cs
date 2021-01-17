@@ -32,9 +32,9 @@ namespace Bokhandel.EntityHelperClasses
             return new Böcker()
             {
                 Isbn = userInputBokInfo[0],
-                Pris = Decimal.Parse(userInputBokInfo[1]),
+                Titel = userInputBokInfo[1],
                 Språk = userInputBokInfo[2],
-                Titel = userInputBokInfo[3],
+                Pris = Decimal.Parse(userInputBokInfo[3]),
                 Utgivningsdatum = DateTime.Parse(userInputBokInfo[4])
             };
         }
