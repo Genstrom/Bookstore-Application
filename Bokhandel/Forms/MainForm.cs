@@ -93,23 +93,26 @@ namespace Bokhandel.Forms
                 Förlag förlag = null;
                 if (dataGridView.Rows.Count < 1) return;
                 if (dataGridView.Rows[indexOfRow].Cells[0]  == null) return;
-                 var userInputBokInfo = new string[(dataGridView.Rows.Count-amountOfRows) * 5];
-                 for (var i = 0; i < dataGridView.Rows.Count-amountOfRows; i++)
-                 {
-                     förlag = dataGridView.Rows[i+amountOfRows].Cells["Förlag"].Value as Förlag;
-                 }
-                 for (var j = amountOfRows; j < dataGridView.Rows.Count; j++)
-                 {
-                     for (var i = 0; i < (dataGridView.Rows.Count) * 5; i++)
+                 var userInputBokInfo = new string[5];
+                
+                     
+                     for (var j = amountOfRows; j < dataGridView.Rows.Count; j++)
                      {
-                         userInputBokInfo[i] = dataGridView.Rows[j].Cells[i].Value.ToString(); 
-                     }
-                     db.Böcker.Add(EntityAdder.AddNyBok(userInputBokInfo));
-                     db.SaveChanges();
+                         for (var x = 0; x < 5; x++)
+                         {
+                             userInputBokInfo[x] = dataGridView.Rows[j].Cells[x].Value.ToString(); 
+                         }
+                         förlag = dataGridView.Rows[j].Cells["Förlag"].Value as Förlag;
+                         db.Böcker.Add(EntityAdder.AddNyBok(userInputBokInfo));
+                         db.SaveChanges();
                  
-                     db.FörfattareBöckerFörlags.Add(EntityAdder.AddNyFörfattareBöckerFörlag(userInputBokInfo, förlag, activeFörfattare));
-                     db.SaveChanges();
-                 }
+                         db.FörfattareBöckerFörlags.Add(EntityAdder.AddNyFörfattareBöckerFörlag(userInputBokInfo, förlag, activeFörfattare));
+                         db.SaveChanges();
+                         
+                     }
+                    
+                
+                
                  
             }
         }
