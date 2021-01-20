@@ -21,7 +21,6 @@ namespace Bokhandel.Forms
         private List<Förlag> FörlagsList { get; set; }
         private BokhandelContext Db { get; set; }
         private MainForm MainForm { get; set; }
-
         private void FormAddFörfattare_Load(object sender, EventArgs e)
         {
             buttonSave.Enabled = false;
@@ -35,7 +34,7 @@ namespace Bokhandel.Forms
             dataGridViewBok.Columns.Add("Info", "Bok");
             dataGridViewBok.Columns.Add("Input", "");
 
-            //dataGridViewFörfattare.RowTemplate.MinimumHeight = 66;
+            //dataGridViewFörfattare.RowTemplate.MinimumHeight = 40;
             dataGridViewBok.RowTemplate.MinimumHeight = 40;
 
             foreach (var name in författareRowNames)
@@ -57,6 +56,8 @@ namespace Bokhandel.Forms
             }
 
         }
+
+        #region Button
         private void buttonCancel_Click(object sender, EventArgs e)
         {
             Close();
@@ -90,20 +91,11 @@ namespace Bokhandel.Forms
 
             Close();
         }
-        private DataGridViewComboBoxCell PopulateFörfattareComboBoxCell(int rowIndex)
-        {
-            var comboBoxCell = dataGridViewFörfattare.Rows[rowIndex].Cells["Input"] as DataGridViewComboBoxCell;
-            comboBoxCell.ValueType = typeof(Förlag);
-            comboBoxCell.DisplayMember = "Namn";
-            comboBoxCell.ValueMember = "This";
 
-            foreach (var förlag in FörlagsList)
-            {
-                comboBoxCell.Items.Add(förlag.This);
-            }
+        #endregion
 
-            return comboBoxCell;
-        }
+        #region DataGrid
+
         private void dataGridViewFörfattare_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             buttonSave.Enabled = false;
@@ -163,6 +155,10 @@ namespace Bokhandel.Forms
             EnableSaveButton();
         }
 
+        #endregion
+
+        #region Methods
+
         private void EnableSaveButton()
         {
             for (int i = 0; i < dataGridViewBok.Rows.Count; i++)
@@ -190,5 +186,21 @@ namespace Bokhandel.Forms
             }
             buttonSave.Enabled = true;
         }
+        private DataGridViewComboBoxCell PopulateFörfattareComboBoxCell(int rowIndex)
+        {
+            var comboBoxCell = dataGridViewFörfattare.Rows[rowIndex].Cells["Input"] as DataGridViewComboBoxCell;
+            comboBoxCell.ValueType = typeof(Förlag);
+            comboBoxCell.DisplayMember = "Namn";
+            comboBoxCell.ValueMember = "This";
+
+            foreach (var förlag in FörlagsList)
+            {
+                comboBoxCell.Items.Add(förlag.This);
+            }
+
+            return comboBoxCell;
+        }
+
+        #endregion
     }
 }

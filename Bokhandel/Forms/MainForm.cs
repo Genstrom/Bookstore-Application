@@ -23,8 +23,6 @@ namespace Bokhandel.Forms
         private bool isFörfattare;
         private Författare activeFörfattare;
         private int amountOfRows { get; set; }
-        private int rowToDelete;
-
         public MainForm()
         {
             InitializeComponent();
@@ -124,7 +122,8 @@ namespace Bokhandel.Forms
                 treeView.SelectedNode = node;
 
                 toolStripMenuItemAddBook.Visible = false;
-                toolStripMenuItemDelete.Visible = false;
+                toolStripMenuItemDeleteFörfattare.Visible = false;
+                toolStripMenuItemDeleteBok.Visible = false;
                 toolStripMenuItemAddFörfattare.Visible = false;
                 toolStripMenuItemAddButik.Visible = false;
                 toolStripMenuItemAddKund.Visible = false;
@@ -144,7 +143,7 @@ namespace Bokhandel.Forms
                         break;
                     case Författare person:
                         toolStripMenuItemNyBok.Visible = true;
-                        toolStripMenuItemDelete.Visible = true;
+                        toolStripMenuItemDeleteFörfattare.Visible = true;
                         break;
                     case "TableNode":
                         if (node.Text == "Författare")
@@ -223,56 +222,9 @@ namespace Bokhandel.Forms
             var form = new FormAddFörfattare(Författare, Förlag, db, this);
             form.ShowDialog();
         }
-        private void toolStripMenuItemDelete_Click(object sender, EventArgs e)
+        private void toolStripMenuItemDeleteBok_Click(object sender, EventArgs e)
         {
             DataGridViewCell selectedCell = null;
-            bool isFörfattareSelected = false;
-
-            foreach (TreeNode child in treeView.Nodes[1].Nodes)
-            {
-                if (!child.IsSelected) continue;
-
-                isFörfattareSelected = true;
-            }
-
-            if (dataGridView.SelectedCells.Count == 0 || isFörfattareSelected)
-            {
-                if (treeView.SelectedNode?.Tag is Författare författare)
-                {
-                    TreeNode selectedNode = null;
-
-                    if (selectedNode == null)
-                    {
-                        selectedNode = treeView.SelectedNode;
-                    }
-                    var result = MessageBox.Show($"Do you want to delete författare {författare.Förnamn} {författare.Efternamn}? " +
-                        $"\nAll the corresponding books will also be deleted.", "Delete författare",
-                           MessageBoxButtons.YesNo
-                           );
-                    if (result == DialogResult.Yes)
-                    {
-                        foreach (var fbf in författare.FörfattareBöckerFörlags)
-                        {
-                            foreach (var bok in böcker)
-                            {
-                                if (bok.Isbn == fbf.Isbn)
-                                {
-                                    db.Böcker.Remove(bok);
-                                    ISBNList.Remove(bok.Isbn);
-                                }
-                            }
-                        }
-                        treeView.Nodes.Remove(selectedNode);
-                        treeView.Nodes.Clear();
-
-                        Författare.Remove(författare);
-                        db.Författare.Remove(författare);
-                        db.SaveChanges();
-                        TreeViewRootPopulator(TableNameList, Författare, Kunder, Orders);
-                    }
-                }
-                return;
-            }
 
             selectedCell = dataGridView.SelectedCells[0];
             if (selectedCell.OwningRow.Tag is LagerSaldo saldo)
@@ -315,55 +267,93 @@ namespace Bokhandel.Forms
                 dataGridView.Rows.Remove(selectedCell.OwningRow);
             }
         }
+        private void toolStripMenuItemDeleteFörfattare_Click(object sender, EventArgs e)
+        {
+            if (treeView.SelectedNode?.Tag is Författare författare)
+            {
+                var selectedNode = treeView.SelectedNode;
+
+                var result = MessageBox.Show($"Do you want to delete författare {författare.Förnamn} {författare.Efternamn}? " +
+                    $"\nAll the corresponding books will also be deleted.", "Delete författare",
+                       MessageBoxButtons.YesNo
+                       );
+                if (result == DialogResult.Yes)
+                {
+                    foreach (var fbf in författare.FörfattareBöckerFörlags)
+                    {
+                        foreach (var bok in böcker)
+                        {
+                            if (bok.Isbn == fbf.Isbn)
+                            {
+                                db.Böcker.Remove(bok);
+                                ISBNList.Remove(bok.Isbn);
+                            }
+                        }
+                    }
+                    treeView.Nodes.Remove(selectedNode);
+                    treeView.Nodes.Clear();
+
+                    Författare.Remove(författare);
+                    db.Författare.Remove(författare);
+                    db.SaveChanges();
+
+                    TreeViewRootPopulator(TableNameList, Författare, Kunder, Orders);
+
+                    dataGridView.Rows.Clear();
+                    dataGridView.Columns.Clear();
+                }
+            }
+        }
 
         #endregion
+
         private void buttonDelete_Click(object sender, EventArgs e)
         {
-            var selectedCell = dataGridView.SelectedCells[0];
-            if (selectedCell.OwningRow.Tag is LagerSaldo saldo)
-            {
-                var result = MessageBox.Show($"Do you want to delete book {saldo.IsbnNavigation.Titel}?",
-                    "Delete book",
-                    MessageBoxButtons.YesNo
-                    );
+            //var selectedCell = dataGridView.SelectedCells[0];
+            //if (selectedCell.OwningRow.Tag is LagerSaldo saldo)
+            //{
+            //    var result = MessageBox.Show($"Do you want to delete book {saldo.IsbnNavigation.Titel}?",
+            //        "Delete book",
+            //        MessageBoxButtons.YesNo
+            //        );
 
 
 
-                if (result == DialogResult.Yes)
-                {
+            //    if (result == DialogResult.Yes)
+            //    {
 
-                    saldo.Butiks.LagerSaldos.Remove(saldo);
+            //        saldo.Butiks.LagerSaldos.Remove(saldo);
 
-                    dataGridView.Rows.Remove(selectedCell.OwningRow);
+            //        dataGridView.Rows.Remove(selectedCell.OwningRow);
 
-                    if (db.LagerSaldo.Any(ls => ls.ButiksId == saldo.ButiksId && ls.Isbn == saldo.Isbn)) //Checks the database if row exists before trying to save to avoid UpdateConcurrencyException
-                    {
-                        ISBNList.Remove(saldo.Isbn);
-                        db.Remove(saldo);
-                        db.SaveChanges();
-                    }
-                }
+            //        if (db.LagerSaldo.Any(ls => ls.ButiksId == saldo.ButiksId && ls.Isbn == saldo.Isbn)) //Checks the database if row exists before trying to save to avoid UpdateConcurrencyException
+            //        {
+            //            ISBNList.Remove(saldo.Isbn);
+            //            db.Remove(saldo);
+            //            db.SaveChanges();
+            //        }
+            //    }
 
-            }
-            else if (selectedCell.Tag is Böcker bok)
-            {
-                var result = MessageBox.Show($"Do you want to delete book {bok.Titel}?", "Delete book",
-                    MessageBoxButtons.YesNo
-                );
-                if (result == DialogResult.Yes)
-                {
-                    db.Böcker.Remove(bok);
-                    dataGridView.Rows.Remove(selectedCell.OwningRow);
-                    db.SaveChanges();
-                    amountOfRows--;
-                }
+            //}
+            //else if (selectedCell.Tag is Böcker bok)
+            //{
+            //    var result = MessageBox.Show($"Do you want to delete book {bok.Titel}?", "Delete book",
+            //        MessageBoxButtons.YesNo
+            //    );
+            //    if (result == DialogResult.Yes)
+            //    {
+            //        db.Böcker.Remove(bok);
+            //        dataGridView.Rows.Remove(selectedCell.OwningRow);
+            //        db.SaveChanges();
+            //        amountOfRows--;
+            //    }
 
 
-            }
-            else
-            {
-                dataGridView.Rows.Remove(selectedCell.OwningRow);
-            }
+            //}
+            //else
+            //{
+            //    dataGridView.Rows.Remove(selectedCell.OwningRow);
+            //}
 
         }
 
@@ -470,17 +460,16 @@ namespace Bokhandel.Forms
             if (e.Button != MouseButtons.Right) return;
 
             toolStripMenuItemAddBook.Visible = false;
-            toolStripMenuItemDelete.Visible = false;
+            toolStripMenuItemDeleteBok.Visible = false;
             toolStripMenuItemAddFörfattare.Visible = false;
             toolStripMenuItemAddButik.Visible = false;
             toolStripMenuItemAddKund.Visible = false;
             toolStripMenuItemNyBok.Visible = false;
-            toolStripMenuItemDelete.Visible = true;
+            toolStripMenuItemDeleteFörfattare.Visible = false;
+            toolStripMenuItemDeleteBok.Visible = true;
 
             dataGridView.ClearSelection();
             dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Selected = true;
-            rowToDelete = e.RowIndex;
-
         }
 
         #endregion
