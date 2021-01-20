@@ -31,7 +31,7 @@ namespace Bokhandel.Forms
         {
             this.components = new System.ComponentModel.Container();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.treeViewCustomerOrders = new System.Windows.Forms.TreeView();
+            this.treeView = new System.Windows.Forms.TreeView();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.buttonDelete = new System.Windows.Forms.Button();
             this.dataGridView = new System.Windows.Forms.DataGridView();
@@ -63,7 +63,7 @@ namespace Bokhandel.Forms
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.treeViewCustomerOrders);
+            this.splitContainer1.Panel1.Controls.Add(this.treeView);
             // 
             // splitContainer1.Panel2
             // 
@@ -73,17 +73,17 @@ namespace Bokhandel.Forms
             this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 0;
             // 
-            // treeViewCustomerOrders
+            // treeView
             // 
-            this.treeViewCustomerOrders.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeViewCustomerOrders.Location = new System.Drawing.Point(0, 0);
-            this.treeViewCustomerOrders.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
-            this.treeViewCustomerOrders.Name = "treeViewCustomerOrders";
-            this.treeViewCustomerOrders.Size = new System.Drawing.Size(364, 627);
-            this.treeViewCustomerOrders.TabIndex = 0;
-            this.treeViewCustomerOrders.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeViewCustomerOrders_BeforeSelect);
-            this.treeViewCustomerOrders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewCustomerOrders_AfterSelect);
-            this.treeViewCustomerOrders.MouseClick += new System.Windows.Forms.MouseEventHandler(this.treeViewCustomerOrders_MouseClick);
+            this.treeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView.Location = new System.Drawing.Point(0, 0);
+            this.treeView.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
+            this.treeView.Name = "treeView";
+            this.treeView.Size = new System.Drawing.Size(364, 627);
+            this.treeView.TabIndex = 0;
+            this.treeView.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeViewCustomerOrders_BeforeSelect);
+            this.treeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewCustomerOrders_AfterSelect);
+            this.treeView.MouseClick += new System.Windows.Forms.MouseEventHandler(this.treeViewCustomerOrders_MouseClick);
             // 
             // splitContainer2
             // 
@@ -223,7 +223,7 @@ namespace Bokhandel.Forms
         #endregion
 
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.TreeView treeViewCustomerOrders;
+        private System.Windows.Forms.TreeView treeView;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemDelete;
