@@ -1,5 +1,7 @@
 ﻿using Bokhandel.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 #nullable disable
 
@@ -30,7 +32,13 @@ namespace Bokhandel
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-                optionsBuilder.UseSqlServer("Server=localhost;Database=Bokhandel;Trusted_Connection=True;");
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .AddUserSecrets("7bf72ef3-8081-4644-96b8-2dbdad3a85b7")
+                .Build();
+
+                optionsBuilder.UseSqlServer(config.GetConnectionString("localhost"));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

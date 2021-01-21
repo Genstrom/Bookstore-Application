@@ -1,4 +1,5 @@
-﻿using Bokhandel.Models;
+﻿using Bokhandel.EntityHelperClasses;
+using Bokhandel.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -6,8 +7,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Bokhandel.EntityHelperClasses;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Bokhandel.Forms
 {
@@ -17,50 +16,51 @@ namespace Bokhandel.Forms
         private List<Böcker> böcker;
         private List<Butiker> butiker;
         private Butiker activeButik = null;
-        private LagerSaldo LagerSaldos = null;
+        private LagerSaldo lagerSaldos = null;
         private List<String> ISBNList = new List<String>();
         private int indexOfRow = 0;
         private bool isButik = false;
         private bool isFörfattare;
         private Författare activeFörfattare;
         private int amountOfRows { get; set; }
-
-        private List<Författare> Författare { get; set; }
-        private List<Förlag> Förlag { get; set; }
         public MainForm()
         {
             InitializeComponent();
         }
+        public List<string> GetISBNList { get { return ISBNList; } }
+        private List<Författare> Författare { get; set; }
+        private List<Förlag> Förlag { get; set; }
+        private List<Kunder> Kunder { get; set; }
+        private List<Order> Orders { get; set; }
+        private List<string> TableNameList => new List<string>() { "Butiker", "Författare", "Förlag", "Kunder", "Ordrar" };
 
+        #region MainForm Events
         private void MainForm_Load(object sender, EventArgs e)
         {
+
+
+        }
+        private void MainForm_Activated(object sender, EventArgs e)
+        {
+            treeView.Nodes.Clear();
+
             if (db.Database.CanConnect())
             {
                 böcker = db.Böcker.OrderBy(b => b.Titel).ToList();
-                var lagerSaldo = db.LagerSaldo.ToList();
-                var kunder = db.Kunder.ToList();
-                var orders = db.Orders.Include(od => od.Orderdetaljers).ToList();
+                Kunder = db.Kunder.ToList();
+                Orders = db.Orders.Include(od => od.Orderdetaljers).ToList();
                 butiker = db.Butiker.Include(l => l.LagerSaldos).ToList();
-                var författare = db.Författare.ToList();
+                Författare = db.Författare.ToList();
                 Förlag = db.Förlag.ToList();
-                var tableNames = db.Model.GetEntityTypes();
-                var tableList = tableNames.ToList();
+
+                ISBNList.Clear();
 
                 foreach (var bok in böcker)
                 {
                     ISBNList.Add(bok.Isbn);
                 }
 
-                tableList.Remove(tableList[1]);
-                tableList.Remove(tableList[2]);
-                tableList.Remove(tableList[4]);
-                tableList.Remove(tableList[5]);
-                tableList.Remove(tableList[5]);
-                tableList.Remove(tableList[5]);
-
-
-                TreeViewRootPopulator(tableList, författare, kunder, orders);
-
+                TreeViewRootPopulator(TableNameList, Författare, Kunder, Orders);
             }
             else
             {
@@ -68,15 +68,14 @@ namespace Bokhandel.Forms
             }
         }
 
-        
+        #endregion
 
+        #region TreeView Events
         private void treeViewCustomerOrders_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            LagerSaldos = null;
+            lagerSaldos = null;
             db.SaveChanges();
             if (e.Node.Index < 0) return;
-            dataGridView.Columns.Clear();
-            dataGridView.Rows.Clear();
             var lagerSaldo = db.LagerSaldo.ToList();
             böcker = db.Böcker.ToList();
             var orders = db.Orders.ToList();
@@ -92,41 +91,39 @@ namespace Bokhandel.Forms
             if (isFörfattare)
             {
                 Förlag förlag = null;
-                if (dataGridView.Rows.Count < 1) return;
-                if (dataGridView.Rows[indexOfRow].Cells[0]  == null) return;
-                 var userInputBokInfo = new string[5];
-                
-                     
-                     for (var j = amountOfRows; j < dataGridView.Rows.Count; j++)
-                     {
-                         for (var x = 0; x < 5; x++)
-                         {
-                             userInputBokInfo[x] = dataGridView.Rows[j].Cells[x].Value.ToString(); 
-                         }
-                         förlag = dataGridView.Rows[j].Cells["Förlag"].Value as Förlag;
-                         db.Böcker.Add(EntityAdder.AddNyBok(userInputBokInfo));
-                         db.SaveChanges();
-                 
-                         db.FörfattareBöckerFörlags.Add(EntityAdder.AddNyFörfattareBöckerFörlag(userInputBokInfo, förlag, activeFörfattare));
-                         db.SaveChanges();
-                         
-                     }
-                    
-                
-                
-                 
+                var userInputBokInfo = new string[5];
+
+                if ((dataGridView.Rows.Count - amountOfRows) < 1) return;
+
+
+                for (var j = amountOfRows; j < dataGridView.Rows.Count; j++)
+                {
+                    for (var x = 0; x < 5; x++)
+                    {
+                        if (string.IsNullOrEmpty(dataGridView.Rows[j].Cells[x].Value as string)) return;
+
+                        userInputBokInfo[x] = dataGridView.Rows[j].Cells[x].Value.ToString();
+                    }
+                    förlag = dataGridView.Rows[j].Cells["Förlag"].Value as Förlag;
+                    db.Böcker.Add(EntityAdder.AddNyBok(userInputBokInfo));
+                    db.SaveChanges();
+
+                    db.FörfattareBöckerFörlags.Add(EntityAdder.AddNyFörfattareBöckerFörlag(userInputBokInfo, förlag, activeFörfattare));
+                    db.SaveChanges();
+
+                }
             }
         }
-
         private void treeViewCustomerOrders_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
-                var node = treeViewCustomerOrders.GetNodeAt(e.X, e.Y);
-                treeViewCustomerOrders.SelectedNode = node;
+                var node = treeView.GetNodeAt(e.X, e.Y);
+                treeView.SelectedNode = node;
 
                 toolStripMenuItemAddBook.Visible = false;
-                toolStripMenuItemDelete.Visible = false;
+                toolStripMenuItemDeleteFörfattare.Visible = false;
+                toolStripMenuItemDeleteBok.Visible = false;
                 toolStripMenuItemAddFörfattare.Visible = false;
                 toolStripMenuItemAddButik.Visible = false;
                 toolStripMenuItemAddKund.Visible = false;
@@ -146,7 +143,7 @@ namespace Bokhandel.Forms
                         break;
                     case Författare person:
                         toolStripMenuItemNyBok.Visible = true;
-                        toolStripMenuItemDelete.Visible = true;
+                        toolStripMenuItemDeleteFörfattare.Visible = true;
                         break;
                     case "TableNode":
                         if (node.Text == "Författare")
@@ -166,10 +163,273 @@ namespace Bokhandel.Forms
                         break;
                 }
 
-                contextMenuStrip.Show(treeViewCustomerOrders.PointToScreen(new Point(e.X, e.Y)));
+                contextMenuStrip.Show(treeView.PointToScreen(new Point(e.X, e.Y)));
             }
         }
 
+        #endregion
+
+        #region ToolStripMenuItem Events
+        private void toolStripMenuItemAddBook_Click(object sender, EventArgs e)
+        {
+            if (activeButik == null)
+                return;
+
+            var node = treeView.SelectedNode;
+            lagerSaldos = new LagerSaldo()
+            {
+                ButiksId = activeButik.Id
+            };
+
+
+            if (node.Tag is Butiker butik)
+            {
+                indexOfRow = dataGridView.Rows.Add();
+
+                dataGridView.Rows[indexOfRow].Tag = lagerSaldos;
+                dataGridView.Rows[indexOfRow].Cells[1] = new DataGridViewComboBoxCell();
+                var comboBoxCell = PopulateComboBoxCell(indexOfRow, butik);
+                comboBoxCell.Value = comboBoxCell.Items[0];
+
+                var bok = comboBoxCell.Value as Böcker;
+                dataGridView.Rows[indexOfRow].Cells["ISBN"].Value = bok.Isbn;
+                dataGridView.Rows[indexOfRow].Cells["Pris"].Value = bok.Pris.ToString("0.##");
+                dataGridView.Rows[indexOfRow].Cells["Lagersaldo"].Value = 1;
+            }
+        }
+        private void toolStripMenuItemNyBok_Click(object sender, EventArgs e)
+        {
+            var node = treeView.SelectedNode;
+            if (!(node.Tag is Författare författare)) return;
+            activeFörfattare = författare;
+
+
+
+            indexOfRow = dataGridView.Rows.Add();
+            dataGridView.Rows[indexOfRow].Cells["Förlag"] = new DataGridViewComboBoxCell();
+            var comboBoxCell = dataGridView.Rows[indexOfRow].Cells["Förlag"] as DataGridViewComboBoxCell;
+            comboBoxCell.ValueType = typeof(Förlag);
+            comboBoxCell.DisplayMember = "Namn";
+            comboBoxCell.ValueMember = "This";
+            foreach (var förlag in Förlag)
+            {
+                comboBoxCell.Items.Add(förlag.This);
+            }
+            comboBoxCell.Value = comboBoxCell.Items[0];
+        }
+        private void toolStripMenuItemAddFörfattare_Click(object sender, EventArgs e)
+        {
+            var form = new FormAddFörfattare(Författare, Förlag, db, this);
+            form.ShowDialog();
+        }
+        private void toolStripMenuItemDeleteBok_Click(object sender, EventArgs e)
+        {
+            DataGridViewCell selectedCell = null;
+
+            selectedCell = dataGridView.SelectedCells[0];
+            if (selectedCell.OwningRow.Tag is LagerSaldo saldo)
+            {
+                var result = MessageBox.Show($"Do you want to delete book {saldo.IsbnNavigation.Titel}?",
+                    "Delete book",
+                    MessageBoxButtons.YesNo
+                    );
+
+                if (result == DialogResult.Yes)
+                {
+
+                    saldo.Butiks.LagerSaldos.Remove(saldo);
+
+                    dataGridView.Rows.Remove(selectedCell.OwningRow);
+
+                    if (db.LagerSaldo.Any(ls => ls.ButiksId == saldo.ButiksId && ls.Isbn == saldo.Isbn)) //Checks the database if row exists before trying to save to avoid UpdateConcurrencyException
+                    {
+                        ISBNList.Remove(saldo.Isbn);
+                        db.Remove(saldo);
+                        db.SaveChanges();
+                    }
+                }
+            }
+            else if (selectedCell.OwningRow.Tag is Böcker b)
+            {
+                var result = MessageBox.Show($"Do you want to delete book {b.Titel}?", "Delete book",
+                    MessageBoxButtons.YesNo
+                );
+                if (result == DialogResult.Yes)
+                {
+                    db.Böcker.Remove(b);
+                    dataGridView.Rows.Remove(selectedCell.OwningRow);
+                    db.SaveChanges();
+                    amountOfRows--;
+                }
+            }
+            else
+            {
+                dataGridView.Rows.Remove(selectedCell.OwningRow);
+            }
+        }
+        private void toolStripMenuItemDeleteFörfattare_Click(object sender, EventArgs e)
+        {
+            if (treeView.SelectedNode?.Tag is Författare författare)
+            {
+                var selectedNode = treeView.SelectedNode;
+
+                var result = MessageBox.Show($"Do you want to delete författare {författare.Förnamn} {författare.Efternamn}? " +
+                    $"\nAll the corresponding books will also be deleted.", "Delete författare",
+                       MessageBoxButtons.YesNo
+                       );
+                if (result == DialogResult.Yes)
+                {
+                    foreach (var fbf in författare.FörfattareBöckerFörlags)
+                    {
+                        foreach (var bok in böcker)
+                        {
+                            if (bok.Isbn == fbf.Isbn)
+                            {
+                                db.Böcker.Remove(bok);
+                                ISBNList.Remove(bok.Isbn);
+                            }
+                        }
+                    }
+                    treeView.Nodes.Remove(selectedNode);
+                    treeView.Nodes.Clear();
+
+                    Författare.Remove(författare);
+                    db.Författare.Remove(författare);
+                    db.SaveChanges();
+
+                    TreeViewRootPopulator(TableNameList, Författare, Kunder, Orders);
+
+                    dataGridView.Rows.Clear();
+                    dataGridView.Columns.Clear();
+                }
+            }
+        }
+
+        #endregion
+
+        private void buttonDelete_Click(object sender, EventArgs e)
+        {
+            //var selectedCell = dataGridView.SelectedCells[0];
+            //if (selectedCell.OwningRow.Tag is LagerSaldo saldo)
+            //{
+            //    var result = MessageBox.Show($"Do you want to delete book {saldo.IsbnNavigation.Titel}?",
+            //        "Delete book",
+            //        MessageBoxButtons.YesNo
+            //        );
+
+
+
+            //    if (result == DialogResult.Yes)
+            //    {
+
+            //        saldo.Butiks.LagerSaldos.Remove(saldo);
+
+            //        dataGridView.Rows.Remove(selectedCell.OwningRow);
+
+            //        if (db.LagerSaldo.Any(ls => ls.ButiksId == saldo.ButiksId && ls.Isbn == saldo.Isbn)) //Checks the database if row exists before trying to save to avoid UpdateConcurrencyException
+            //        {
+            //            ISBNList.Remove(saldo.Isbn);
+            //            db.Remove(saldo);
+            //            db.SaveChanges();
+            //        }
+            //    }
+
+            //}
+            //else if (selectedCell.Tag is Böcker bok)
+            //{
+            //    var result = MessageBox.Show($"Do you want to delete book {bok.Titel}?", "Delete book",
+            //        MessageBoxButtons.YesNo
+            //    );
+            //    if (result == DialogResult.Yes)
+            //    {
+            //        db.Böcker.Remove(bok);
+            //        dataGridView.Rows.Remove(selectedCell.OwningRow);
+            //        db.SaveChanges();
+            //        amountOfRows--;
+            //    }
+
+
+            //}
+            //else
+            //{
+            //    dataGridView.Rows.Remove(selectedCell.OwningRow);
+            //}
+
+        }
+
+        #region DataGrid Events
+
+        private void dataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            if (isButik)
+            {
+                AddBookToStore(e);
+            }
+            else if (isFörfattare)
+            {
+                switch (e.ColumnIndex)
+                {
+                    case 0: // isbn
+                        if (dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value == null ||
+                            dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value?.ToString().Length != 13 ||
+                            !EntityAdder.ISBNConstraint.IsMatch(dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value?.ToString()))
+                        {
+                            MessageBox.Show("ISBN format is not correct, must be 13 numbers.", "Error");
+                            dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = null;
+                        }
+                        else if (!EntityAdder.IsISBNUnique(dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value?.ToString(), GetISBNList) &&
+                            e.RowIndex >= amountOfRows)
+                        {
+                            MessageBox.Show("A book with that ISBN already exists!", "Error");
+                            dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = null;
+                        }
+                        break;
+                    case 3: // pris
+                        if (!decimal.TryParse(dataGridView.Rows[e.RowIndex].Cells["Pris"].Value?.ToString(), out decimal priceResult))
+                        {
+                            MessageBox.Show("Price format is not correct, can only be numbers", "Error");
+                            dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = "";
+                        }
+                        break;
+                    case 4: // utgivningsdatum
+                        if (!DateTime.TryParse(dataGridView.Rows[e.RowIndex].Cells["Utgivningsdatum"].Value?.ToString(), out DateTime dateTimeResult))
+                        {
+                            MessageBox.Show("Date format is not correct, use yy-mm-dd", "Error");
+                            dataGridView.Rows[e.RowIndex].Cells["Utgivningsdatum"].Value = "";
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+
+                if (e.RowIndex < amountOfRows) return;
+                {
+                    for (int i = 0; i < dataGridView.Rows.Count - 1; i++)
+                    {
+                        var currentISBN = dataGridView.Rows[i].Cells["ISBN"].Value?.ToString();
+                        var nextISBN = dataGridView.Rows[i + 1].Cells["ISBN"].Value?.ToString();
+                        if (currentISBN != nextISBN)
+                        {
+                            continue;
+                        }
+                        else if (string.IsNullOrEmpty(dataGridView.Rows[i].Cells["ISBN"].Value as string))
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            MessageBox.Show("A book with that ISBN already exists!", "Error");
+                            dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = null;
+                        }
+                    }
+                }
+            }
+
+
+        }
         private void dataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -195,190 +455,26 @@ namespace Bokhandel.Forms
                 }
             }
         }
-
-        private void toolStripMenuItemAddBook_Click(object sender, EventArgs e)
+        private void dataGridView_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
-            if (activeButik == null)
-                return;
+            if (e.Button != MouseButtons.Right) return;
 
-            var node = treeViewCustomerOrders.SelectedNode;
-            LagerSaldos = new LagerSaldo()
-            {
-                ButiksId = activeButik.Id
-            };
+            toolStripMenuItemAddBook.Visible = false;
+            toolStripMenuItemDeleteBok.Visible = false;
+            toolStripMenuItemAddFörfattare.Visible = false;
+            toolStripMenuItemAddButik.Visible = false;
+            toolStripMenuItemAddKund.Visible = false;
+            toolStripMenuItemNyBok.Visible = false;
+            toolStripMenuItemDeleteFörfattare.Visible = false;
+            toolStripMenuItemDeleteBok.Visible = true;
 
-
-            if (node.Tag is Butiker butik)
-            {
-
-                indexOfRow = dataGridView.Rows.Add();
-                
-                dataGridView.Rows[indexOfRow].Tag = LagerSaldos;
-                dataGridView.Rows[indexOfRow].Cells[1] = new DataGridViewComboBoxCell();
-                var comboBoxCell = PopulateComboBoxCell(indexOfRow, butik);
-                comboBoxCell.Value = comboBoxCell.Items[0];
-
-                var bok = comboBoxCell.Value as Böcker;
-                dataGridView.Rows[indexOfRow].Cells["ISBN"].Value = bok.Isbn;
-                dataGridView.Rows[indexOfRow].Cells["Pris"].Value = bok.Pris.ToString("0.##");
-                dataGridView.Rows[indexOfRow].Cells["Lagersaldo"].Value = 1;
-
-            }
-        }
-        private void toolStripMenuItemNyBok_Click(object sender, EventArgs e)
-        {
-            var node = treeViewCustomerOrders.SelectedNode;
-            if (!(node.Tag is Författare författare)) return;
-            activeFörfattare = författare;
-
-
-
-            indexOfRow = dataGridView.Rows.Add();
-            dataGridView.Rows[indexOfRow].Cells["Förlag"] = new DataGridViewComboBoxCell();
-            var comboBoxCell = dataGridView.Rows[indexOfRow].Cells["Förlag"] as DataGridViewComboBoxCell;
-            comboBoxCell.ValueType = typeof(Förlag);
-            comboBoxCell.DisplayMember = "Namn";
-            comboBoxCell.ValueMember = "This";
-            foreach (var förlag in Förlag)
-            {
-                comboBoxCell.Items.Add(förlag.This);
-            }
-
-        }
-        private void toolStripMenuItemAddFörfattare_Click(object sender, EventArgs e)
-        {
-            var form = new FormAddFörfattare(Författare, Förlag, db);
-            form.ShowDialog();
-        }
-        
-        private void toolStripMenuItemDelete_Click(object sender, EventArgs e)
-        {
-            if (treeViewCustomerOrders.SelectedNode.Tag is Böcker)
-            {
-
-            }
-            if (treeViewCustomerOrders.SelectedNode.Tag is Författare)
-            {
-                
-            }
-            
+            dataGridView.ClearSelection();
+            dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Selected = true;
         }
 
-        private void buttonDelete_Click(object sender, EventArgs e)
-        {
-            DataGridViewSelectedCellCollection selectedCellItems = null;
+        #endregion
 
-
-            if (dataGridView.SelectedCells != null)
-            {
-                selectedCellItems = dataGridView.SelectedCells;
-            }
-          
-           
-            foreach (DataGridViewCell cell in selectedCellItems)
-            {
-                var selectedRow = dataGridView.Rows[cell.RowIndex];
-                if (dataGridView.Rows[cell.RowIndex].Tag is LagerSaldo saldo)
-                {
-                    var result = MessageBox.Show($"Do you want to delete book {saldo.IsbnNavigation.Titel}?", "Delete book",
-                        MessageBoxButtons.YesNo
-                        );
-
-
-
-                    if (result == DialogResult.Yes)
-                    {
-
-                        saldo.Butiks.LagerSaldos.Remove(saldo);
-
-                        dataGridView.Rows.Remove(selectedRow);
-
-                        if (db.LagerSaldo.Any(ls => ls.ButiksId == saldo.ButiksId && ls.Isbn == saldo.Isbn)) //Checks the database if row exists before trying to save to avoid UpdateConcurrencyException
-                        {
-                            ISBNList.Remove(saldo.Isbn);
-                            db.Remove(saldo);
-                            db.SaveChanges();
-                        }
-                    }
-
-                }
-                else if (dataGridView.Rows[cell.RowIndex].Tag is Böcker bok)
-                {
-                    var result = MessageBox.Show($"Do you want to delete book {bok.Titel}?", "Delete book",
-                        MessageBoxButtons.YesNo
-                    );
-                    if (result == DialogResult.Yes)
-                    {
-                        //bok.FörfattareBöckerFörlags
-                        //var book = context.Blogs.OrderBy(e => e.Name).Include(e => e.Posts).First();
-                        //db.FörfattareBöckerFörlags.Remove(bok);
-                        db.Böcker.Remove(bok);
-                        dataGridView.Rows.Remove(selectedRow);
-                        db.SaveChanges();
-                    }
-                    
-                    
-                }
-                else
-                {
-                    dataGridView.Rows.Remove(selectedRow);
-                }
-
-            }
-        }
-
-        private void dataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0) return;
-
-            if (isButik)
-            {
-                AddBookToStore(e);
-            }
-            else
-            {
-                return; //lägg till andra checks om du vill kunna lägga till kunder etc etc.
-            }
-
-        }
-
-        private void AddNewBookToFörfattare(DataGridViewCellEventArgs e)
-        {
-            string ISBN = "";
-            string titel = "";
-            string språk = "";
-            decimal pris = 0;
-            DateTime utgivningsdatum = new DateTime();
-
-
-            ISBN = dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value?.ToString();
-            titel = dataGridView.Rows[e.RowIndex].Cells["Titel"].Value?.ToString();
-            språk = dataGridView.Rows[e.RowIndex].Cells["Språk"].Value?.ToString();
-
-
-            pris = Convert.ToDecimal(dataGridView.Rows[e.RowIndex].Cells["Pris"].Value);
-            utgivningsdatum = Convert.ToDateTime(dataGridView.Rows[e.RowIndex].Cells["Utgivningsdatum"].Value);
-
-            if (ISBN != null &&
-                titel != null &&
-                språk != null &&
-                pris != 0 &&
-                utgivningsdatum != DateTime.MinValue)
-            {
-                var nyBok = new Böcker()
-                {
-                    Isbn = ISBN,
-                    Titel = titel,
-                    Språk = språk,
-                    Pris = pris,
-                    Utgivningsdatum = utgivningsdatum
-                };
-
-                db.Böcker.Add(nyBok);
-            }
-
-        }
-
+        #region Methods
         private void AddBookToStore(DataGridViewCellEventArgs e)
         {
             var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
@@ -417,7 +513,6 @@ namespace Bokhandel.Forms
                 lagerSaldo.Antal = result;
             }
         }
-
         private DataGridViewComboBoxCell PopulateComboBoxCell(int rowIndex, Butiker butik)
         {
             var comboBoxCell = dataGridView.Rows[rowIndex].Cells["Titel"] as DataGridViewComboBoxCell;
@@ -444,100 +539,99 @@ namespace Bokhandel.Forms
 
             return comboBoxCell;
         }
-        
         private void PopulateTreeNode(TreeViewEventArgs e, List<LagerSaldo> lagerSaldo, DbSet<FörfattareBöckerFörlag> författarePerBok, List<Order> orders)
         {
             switch (e.Node.Tag)
             {
                 case Butiker butik:
-                {
-                    isButik = true;
-                    activeButik = butik;
-                    dataGridView.Rows.Clear();
-                    dataGridView.Columns.Clear();
-                    dataGridView.Columns.Add("ISBN", "ISBN");
-                    dataGridView.Columns.Add("Titel", "Titel");
-                    dataGridView.Columns.Add("Lagersaldo", "Lagersaldo");
-                    dataGridView.Columns.Add("Pris", "Pris");
-                    foreach (var bok in böcker)
-                    foreach (var saldo in lagerSaldo)
-                        if (saldo.ButiksId == butik.Id)
-                            if (bok.Isbn == saldo.Isbn)
-                            {
-                                var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok, saldo.Antal, bok.Pris.ToString("0.##"));
-                                dataGridView.Rows[rowIndex].Tag = saldo;
-                                dataGridView.Rows[rowIndex].Cells["ISBN"].Value = bok.Isbn;
-                                dataGridView.Rows[rowIndex].Cells["Titel"].Value = bok.Titel;
-                                dataGridView.Rows[rowIndex].Cells["Lagersaldo"].Value = saldo.Antal;
-                                dataGridView.Rows[rowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
-                            }
+                    {
+                        isButik = true;
+                        activeButik = butik;
+                        dataGridView.Rows.Clear();
+                        dataGridView.Columns.Clear();
+                        dataGridView.Columns.Add("ISBN", "ISBN");
+                        dataGridView.Columns.Add("Titel", "Titel");
+                        dataGridView.Columns.Add("Lagersaldo", "Lagersaldo");
+                        dataGridView.Columns.Add("Pris", "Pris");
+                        foreach (var bok in böcker)
+                            foreach (var saldo in lagerSaldo)
+                                if (saldo.ButiksId == butik.Id)
+                                    if (bok.Isbn == saldo.Isbn)
+                                    {
+                                        var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok, saldo.Antal, bok.Pris.ToString("0.##"));
+                                        dataGridView.Rows[rowIndex].Tag = saldo;
+                                        dataGridView.Rows[rowIndex].Cells["ISBN"].Value = bok.Isbn;
+                                        dataGridView.Rows[rowIndex].Cells["Titel"].Value = bok.Titel;
+                                        dataGridView.Rows[rowIndex].Cells["Lagersaldo"].Value = saldo.Antal;
+                                        dataGridView.Rows[rowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
+                                    }
 
-                    break;
-                }
+                        break;
+                    }
                 case Författare person:
-                {
-                    isFörfattare = true;
-                    activeButik = null;
-                    dataGridView.Rows.Clear();
-                    dataGridView.Columns.Clear();
-                    dataGridView.Columns.Add("ISBN", "ISBN");
-                    dataGridView.Columns.Add("Titel", "Titel");
-                    dataGridView.Columns.Add("Språk", "Språk");
-                    dataGridView.Columns.Add("Pris", "Pris");
-                    dataGridView.Columns.Add("Utgivningsdatum", "Utgivningsdatum");
-                    dataGridView.Columns.Add("Förlag", "Förlag");
-                    foreach (var bokFörfattare in författarePerBok)
-                    foreach (var bok in böcker)
-                        if (person.FörfattareId == bokFörfattare.FörfattareId)
-                            if (bok.Isbn == bokFörfattare.Isbn)
-                            {
-                                var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Pris.ToString("0.##"),
-                                    bok.Utgivningsdatum.ToShortDateString(), bokFörfattare.Förlags.Namn);
-                                dataGridView.Rows[rowIndex].Tag = bok;
-                            }
+                    {
+                        isFörfattare = true;
+                        activeButik = null;
+                        dataGridView.Rows.Clear();
+                        dataGridView.Columns.Clear();
+                        dataGridView.Columns.Add("ISBN", "ISBN");
+                        dataGridView.Columns.Add("Titel", "Titel");
+                        dataGridView.Columns.Add("Språk", "Språk");
+                        dataGridView.Columns.Add("Pris", "Pris");
+                        dataGridView.Columns.Add("Utgivningsdatum", "Utgivningsdatum");
+                        dataGridView.Columns.Add("Förlag", "Förlag");
+                        foreach (var bokFörfattare in författarePerBok)
+                            foreach (var bok in böcker)
+                                if (person.FörfattareId == bokFörfattare.FörfattareId)
+                                    if (bok.Isbn == bokFörfattare.Isbn)
+                                    {
+                                        var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Pris.ToString("0.##"),
+                                            bok.Utgivningsdatum.ToShortDateString(), bokFörfattare.Förlags.Namn);
+                                        dataGridView.Rows[rowIndex].Tag = bok;
+                                    }
 
-                    amountOfRows = dataGridView.Rows.Count;
+                        amountOfRows = dataGridView.Rows.Count;
 
-                    break;
-                }
+                        break;
+                    }
                 case Order order:
-                {
-                    activeButik = null;
-                    dataGridView.Rows.Clear();
-                    dataGridView.Columns.Clear();
-                    dataGridView.Columns.Add("KundID", "KundID");
-                    dataGridView.Columns.Add("ISBN", "ISBN");
-                    dataGridView.Columns.Add("Titel", "Titel");
-                    dataGridView.Columns.Add("Pris", "Pris");
-                    dataGridView.Columns.Add("Antal", "Antal");
+                    {
+                        activeButik = null;
+                        dataGridView.Rows.Clear();
+                        dataGridView.Columns.Clear();
+                        dataGridView.Columns.Add("KundID", "KundID");
+                        dataGridView.Columns.Add("ISBN", "ISBN");
+                        dataGridView.Columns.Add("Titel", "Titel");
+                        dataGridView.Columns.Add("Pris", "Pris");
+                        dataGridView.Columns.Add("Antal", "Antal");
 
-                    foreach (var ordrar in orders)
-                    foreach (var detalj in ordrar.Orderdetaljers)
-                    foreach (var bok in böcker)
-                        if (detalj.Isbn == bok.Isbn)
-                            if (order.OrderId == detalj.OrderId)
-                                dataGridView.Rows.Add(ordrar.KundId, detalj.Isbn, bok.Titel, detalj.Pris, detalj.Antal);
+                        foreach (var ordrar in orders)
+                            foreach (var detalj in ordrar.Orderdetaljers)
+                                foreach (var bok in böcker)
+                                    if (detalj.Isbn == bok.Isbn)
+                                        if (order.OrderId == detalj.OrderId)
+                                            dataGridView.Rows.Add(ordrar.KundId, detalj.Isbn, bok.Titel, detalj.Pris, detalj.Antal);
 
-                    break;
-                }
+                        break;
+                    }
                 case Förlag förlags:
-                {
-                    activeButik = null;
-                    dataGridView.Rows.Clear();
-                    dataGridView.Columns.Clear();
-                    dataGridView.Columns.Add("FörlagsID", "FörlagsID");
-                    dataGridView.Columns.Add("Kontaktperson", "Kontaktperson");
-                    dataGridView.Columns.Add("Telefonnummer", "Telefonnummer");
-                    dataGridView.Columns.Add("Titlar", "Titlar");
-                    foreach (var bokFörfattare in författarePerBok)
-                    foreach (var bok in böcker)
-                        if (bokFörfattare.FörlagsId == förlags.FörlagsId)
-                            if (bokFörfattare.Isbn == bok.Isbn)
-                                dataGridView.Rows.Add(förlags.FörlagsId, förlags.Kontaktperson, förlags.Telefonnummer,
-                                    bok.Titel);
+                    {
+                        activeButik = null;
+                        dataGridView.Rows.Clear();
+                        dataGridView.Columns.Clear();
+                        dataGridView.Columns.Add("FörlagsID", "FörlagsID");
+                        dataGridView.Columns.Add("Kontaktperson", "Kontaktperson");
+                        dataGridView.Columns.Add("Telefonnummer", "Telefonnummer");
+                        dataGridView.Columns.Add("Titlar", "Titlar");
+                        foreach (var bokFörfattare in författarePerBok)
+                            foreach (var bok in böcker)
+                                if (bokFörfattare.FörlagsId == förlags.FörlagsId)
+                                    if (bokFörfattare.Isbn == bok.Isbn)
+                                        dataGridView.Rows.Add(förlags.FörlagsId, förlags.Kontaktperson, förlags.Telefonnummer,
+                                            bok.Titel);
 
-                    break;
-                }
+                        break;
+                    }
                 case Kunder kund:
                     activeButik = null;
                     dataGridView.Rows.Clear();
@@ -552,17 +646,17 @@ namespace Bokhandel.Forms
                     break;
             }
         }
-        private void TreeViewRootPopulator(List<IEntityType> tableList, List<Författare> författare, List<Kunder> kunder, List<Order> orders)
+        private void TreeViewRootPopulator(List<string> tableList, List<Författare> författare, List<Kunder> kunder, List<Order> orders)
         {
-            foreach (var table in tableList)
+            foreach (var name in tableList)
             {
                 var datum = "";
                 var tableNodes = new TreeNode()
                 {
-                    Text = table.DisplayName(),
+                    Text = name,
                     Tag = "TableNode"
                 };
-                treeViewCustomerOrders.Nodes.Add(tableNodes);
+                treeView.Nodes.Add(tableNodes);
 
                 switch (tableNodes.Text)
                 {
@@ -631,7 +725,7 @@ namespace Bokhandel.Forms
 
                         break;
 
-                    case "Order":
+                    case "Ordrar":
                         foreach (var order in orders)
                         {
                             var orderNode = new TreeNode
@@ -646,5 +740,8 @@ namespace Bokhandel.Forms
                 }
             }
         }
+
+        #endregion
+
     }
 }

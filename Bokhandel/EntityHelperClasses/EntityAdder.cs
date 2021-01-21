@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Bokhandel.EntityHelperClasses
 {
     public static class EntityAdder
     {
+        public static Regex ISBNConstraint => new Regex("([0-9]){13}"); 
+
         public static FörfattareBöckerFörlag AddNyFörfattareBöckerFörlag(string[] userInputBok, Förlag inputFörlag, Författare nyFörfattare)
         {
             return new FörfattareBöckerFörlag()
@@ -37,6 +40,19 @@ namespace Bokhandel.EntityHelperClasses
                 Pris = Decimal.Parse(userInputBokInfo[3]),
                 Utgivningsdatum = DateTime.Parse(userInputBokInfo[4])
             };
+        }
+
+        public static bool IsISBNUnique(string currentISBN, List<string> ISBNList)
+        {
+            foreach (var isbn in ISBNList)
+            {
+                if (currentISBN == isbn)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
