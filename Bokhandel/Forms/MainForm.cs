@@ -150,10 +150,10 @@ namespace Bokhandel.Forms
                         {
                             toolStripMenuItemAddFörfattare.Visible = true;
                         }
-                        else if (node.Text == "Butiker")
+                        /*else if (node.Text == "Butiker")
                         {
                             toolStripMenuItemAddButik.Visible = true;
-                        }
+                        }*/
                         else if (node.Text == "Kunder")
                         {
                             toolStripMenuItemAddKund.Visible = true;
@@ -162,9 +162,10 @@ namespace Bokhandel.Forms
                     default:
                         break;
                 }
-
+                
                 contextMenuStrip.Show(treeView.PointToScreen(new Point(e.X, e.Y)));
             }
+            
         }
 
         #endregion
@@ -457,7 +458,7 @@ namespace Bokhandel.Forms
         }
         private void dataGridView_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Right) return;
+            if (e.Button != MouseButtons.Right || e.RowIndex < 0) return;
 
             toolStripMenuItemAddBook.Visible = false;
             toolStripMenuItemDeleteBok.Visible = false;
@@ -742,6 +743,28 @@ namespace Bokhandel.Forms
         }
 
         #endregion
+        
 
+        private void contextMenuStrip_Closed(object sender, ToolStripDropDownClosedEventArgs e)
+        {
+            /*toolStripMenuItemAddFörfattare.Visible = false;
+            toolStripMenuItemDeleteBok.Visible = true;
+            if (isFörfattare)
+            {
+                toolStripMenuItemDeleteBok.Visible = false;
+            }*/
+        }
+
+        private void dataGridView_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            toolStripMenuItemAddBook.Visible = false;
+            toolStripMenuItemAddFörfattare.Visible = false;
+            toolStripMenuItemAddButik.Visible = false;
+            toolStripMenuItemAddKund.Visible = false;
+            toolStripMenuItemNyBok.Visible = false;
+            toolStripMenuItemDeleteFörfattare.Visible = false;
+            toolStripMenuItemAddFörfattare.Visible = false;
+            toolStripMenuItemDeleteBok.Visible = true;
+        }
     }
 }
