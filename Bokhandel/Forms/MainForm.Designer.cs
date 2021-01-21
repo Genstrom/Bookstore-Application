@@ -41,11 +41,11 @@ namespace Bokhandel.Forms
             this.toolStripMenuItemDeleteFörfattare = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAddButik = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAddKund = new System.Windows.Forms.ToolStripMenuItem();
-            ((System.ComponentModel.ISupportInitialize) (this.splitContainer1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize) (this.dataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).BeginInit();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,7 +53,7 @@ namespace Bokhandel.Forms
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -63,17 +63,18 @@ namespace Bokhandel.Forms
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dataGridView);
-            this.splitContainer1.Size = new System.Drawing.Size(942, 543);
-            this.splitContainer1.SplitterDistance = 312;
+            this.splitContainer1.Size = new System.Drawing.Size(1099, 627);
+            this.splitContainer1.SplitterDistance = 364;
+            this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 0;
             // 
             // treeView
             // 
             this.treeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeView.Location = new System.Drawing.Point(0, 0);
-            this.treeView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.treeView.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.treeView.Name = "treeView";
-            this.treeView.Size = new System.Drawing.Size(312, 543);
+            this.treeView.Size = new System.Drawing.Size(364, 627);
             this.treeView.TabIndex = 0;
             this.treeView.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeViewCustomerOrders_BeforeSelect);
             this.treeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewCustomerOrders_AfterSelect);
@@ -87,23 +88,27 @@ namespace Bokhandel.Forms
             this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView.Location = new System.Drawing.Point(0, 0);
-            this.dataGridView.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.dataGridView.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.dataGridView.Name = "dataGridView";
             this.dataGridView.RowHeadersVisible = false;
             this.dataGridView.RowHeadersWidth = 62;
-            this.dataGridView.RowTemplate.ContextMenuStrip = this.contextMenuStrip;
-            this.dataGridView.Size = new System.Drawing.Size(626, 543);
+            this.dataGridView.Size = new System.Drawing.Size(730, 627);
             this.dataGridView.TabIndex = 1;
             this.dataGridView.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_CellMouseDown);
-            this.dataGridView.CellMouseEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView_CellMouseEnter);
             // 
             // contextMenuStrip
             // 
             this.contextMenuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.toolStripMenuItemAddBook, this.toolStripMenuItemAddFörfattare, this.toolStripMenuItemNyBok, this.toolStripMenuItemDeleteBok, this.toolStripMenuItemDeleteFörfattare, this.toolStripMenuItemAddButik, this.toolStripMenuItemAddKund});
+            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItemAddBook,
+            this.toolStripMenuItemAddFörfattare,
+            this.toolStripMenuItemNyBok,
+            this.toolStripMenuItemDeleteBok,
+            this.toolStripMenuItemDeleteFörfattare,
+            this.toolStripMenuItemAddButik,
+            this.toolStripMenuItemAddKund});
             this.contextMenuStrip.Name = "contextMenuStrip";
             this.contextMenuStrip.Size = new System.Drawing.Size(151, 158);
-            this.contextMenuStrip.Closed += new System.Windows.Forms.ToolStripDropDownClosedEventHandler(this.contextMenuStrip_Closed);
             // 
             // toolStripMenuItemAddBook
             // 
@@ -160,22 +165,23 @@ namespace Bokhandel.Forms
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(942, 543);
+            this.ClientSize = new System.Drawing.Size(1099, 627);
             this.Controls.Add(this.splitContainer1);
-            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.Name = "MainForm";
             this.Text = "MainForm";
             this.Activated += new System.EventHandler(this.MainForm_Activated);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.splitContainer1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize) (this.dataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).EndInit();
             this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
+
         }
 
         #endregion

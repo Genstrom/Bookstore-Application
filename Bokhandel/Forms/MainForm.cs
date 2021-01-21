@@ -308,56 +308,6 @@ namespace Bokhandel.Forms
 
         #endregion
 
-        private void buttonDelete_Click(object sender, EventArgs e)
-        {
-            //var selectedCell = dataGridView.SelectedCells[0];
-            //if (selectedCell.OwningRow.Tag is LagerSaldo saldo)
-            //{
-            //    var result = MessageBox.Show($"Do you want to delete book {saldo.IsbnNavigation.Titel}?",
-            //        "Delete book",
-            //        MessageBoxButtons.YesNo
-            //        );
-
-
-
-            //    if (result == DialogResult.Yes)
-            //    {
-
-            //        saldo.Butiks.LagerSaldos.Remove(saldo);
-
-            //        dataGridView.Rows.Remove(selectedCell.OwningRow);
-
-            //        if (db.LagerSaldo.Any(ls => ls.ButiksId == saldo.ButiksId && ls.Isbn == saldo.Isbn)) //Checks the database if row exists before trying to save to avoid UpdateConcurrencyException
-            //        {
-            //            ISBNList.Remove(saldo.Isbn);
-            //            db.Remove(saldo);
-            //            db.SaveChanges();
-            //        }
-            //    }
-
-            //}
-            //else if (selectedCell.Tag is Böcker bok)
-            //{
-            //    var result = MessageBox.Show($"Do you want to delete book {bok.Titel}?", "Delete book",
-            //        MessageBoxButtons.YesNo
-            //    );
-            //    if (result == DialogResult.Yes)
-            //    {
-            //        db.Böcker.Remove(bok);
-            //        dataGridView.Rows.Remove(selectedCell.OwningRow);
-            //        db.SaveChanges();
-            //        amountOfRows--;
-            //    }
-
-
-            //}
-            //else
-            //{
-            //    dataGridView.Rows.Remove(selectedCell.OwningRow);
-            //}
-
-        }
-
         #region DataGrid Events
 
         private void dataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
@@ -471,6 +421,7 @@ namespace Bokhandel.Forms
 
             dataGridView.ClearSelection();
             dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Selected = true;
+            contextMenuStrip.Show(dataGridView, dataGridView.PointToClient(Cursor.Position));
         }
 
         #endregion
@@ -741,6 +692,7 @@ namespace Bokhandel.Forms
                 }
             }
         }
+
 
         #endregion
         
