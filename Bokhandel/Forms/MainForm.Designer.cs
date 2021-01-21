@@ -92,7 +92,6 @@ namespace Bokhandel.Forms
             this.dataGridView.Name = "dataGridView";
             this.dataGridView.RowHeadersVisible = false;
             this.dataGridView.RowHeadersWidth = 62;
-            this.dataGridView.RowTemplate.ContextMenuStrip = this.contextMenuStrip;
             this.dataGridView.Size = new System.Drawing.Size(730, 627);
             this.dataGridView.TabIndex = 1;
             this.dataGridView.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_CellMouseDown);
