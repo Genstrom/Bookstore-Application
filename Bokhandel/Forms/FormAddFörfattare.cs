@@ -1,14 +1,16 @@
 ﻿using Bokhandel.EntityHelperClasses;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Linq;
 namespace Bokhandel.Forms
 {
     public partial class FormAddFörfattare : Form
     {
         private string[] bokRowNames = new string[] { "ISBN", "Titel", "Språk", "Pris", "Utgivningsdatum" };
         private string[] författareRowNames = new string[] { "Förnamn", "Efternamn", "Födelsedatum" };
+        private List<string> författareFörnamn = new List<string>();
+        private List<string> författareEfternamn = new List<string>();
         public FormAddFörfattare(List<Författare> författarList, List<Förlag> förlagsList, BokhandelContext context, MainForm mainForm)
         {
             InitializeComponent();
@@ -16,6 +18,12 @@ namespace Bokhandel.Forms
             FörlagsList = förlagsList;
             Db = context;
             MainForm = mainForm;
+
+            foreach (var författare in FörfattareList)
+            {
+                författareFörnamn.Add(författare.Förnamn.ToLower());
+                författareEfternamn.Add(författare.Efternamn.ToLower());
+            }
         }
         private List<Författare> FörfattareList { get; set; }
         private List<Förlag> FörlagsList { get; set; }
@@ -100,13 +108,39 @@ namespace Bokhandel.Forms
         {
             buttonSave.Enabled = false;
 
+            switch (e.RowIndex)
+            {
+                case 0:
+                    if (författareFörnamn.Contains(dataGridViewFörfattare.Rows[0].Cells["Input"].Value?.ToString().ToLower().Trim()) &&
+                        författareEfternamn.Contains(dataGridViewFörfattare.Rows[1].Cells["Input"].Value?.ToString().ToLower().Trim()))
+                    {
+                        MessageBox.Show("Författare already exists.", "Error");
+                        dataGridViewFörfattare.Rows[0].Cells["Input"].Value = "";
+                        dataGridViewFörfattare.Rows[1].Cells["Input"].Value = "";
+                    }
+                    break;
+                case 1:
+                    if (författareFörnamn.Contains(dataGridViewFörfattare.Rows[0].Cells["Input"].Value?.ToString().ToLower().Trim()) &&
+                        författareEfternamn.Contains(dataGridViewFörfattare.Rows[1].Cells["Input"].Value?.ToString().ToLower().Trim()))
+                    {
+                        MessageBox.Show("Författare already exists.", "Error");
+                        dataGridViewFörfattare.Rows[0].Cells["Input"].Value = "";
+                        dataGridViewFörfattare.Rows[1].Cells["Input"].Value = "";
+                    }
+                    break;
+                case 2:
+                    if (!DateTime.TryParse(dataGridViewFörfattare.Rows[2].Cells["Input"].Value?.ToString(), out DateTime dateTimeResult))
+                    {
+                        MessageBox.Show("Date format is not correct, use yy-mm-dd.", "Error");
+                        dataGridViewFörfattare.Rows[2].Cells["Input"].Value = "";
+                    }
+                    break;
+                default:
+                    break;
+            }
+
             if (e.RowIndex == 2)
             {
-                if (!DateTime.TryParse(dataGridViewFörfattare.Rows[2].Cells["Input"].Value?.ToString(), out DateTime dateTimeResult))
-                {
-                    MessageBox.Show("Date format is not correct, use yy-mm-dd", "Error");
-                    dataGridViewFörfattare.Rows[2].Cells["Input"].Value = "";
-                }
             }
 
             EnableSaveButton();
