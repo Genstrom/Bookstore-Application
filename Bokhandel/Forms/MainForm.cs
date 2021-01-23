@@ -381,6 +381,32 @@ namespace Bokhandel.Forms
 
 
         }
+        private void dataGridView_CellValueChanged_1(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
+            if (isFörfattare) return;
+
+            if (cell is DataGridViewComboBoxCell comboBoxCell)
+            {
+                var bok = comboBoxCell.Value as Böcker;
+                dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = bok.Pris.ToString("0.##");
+                dataGridView.Rows[e.RowIndex].Cells["Lagersaldo"].Value = 1;
+                dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = bok.Isbn;
+
+                lagerSaldo.Isbn = bok.Isbn;
+                lagerSaldo.IsbnNavigation = bok;
+                lagerSaldo.Antal = 1;
+                lagerSaldo.Butiks = activeButik;
+                if (!activeButik.LagerSaldos.Contains(lagerSaldo))
+                {
+                    activeButik.LagerSaldos.Add(lagerSaldo);
+                }
+            }
+            
+        }
         private void dataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -718,5 +744,7 @@ namespace Bokhandel.Forms
             toolStripMenuItemAddFörfattare.Visible = false;
             toolStripMenuItemDeleteBok.Visible = true;
         }
+
+
     }
 }
