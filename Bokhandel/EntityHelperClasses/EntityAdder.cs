@@ -44,13 +44,10 @@ namespace Bokhandel.EntityHelperClasses
 
         public static bool IsISBNUnique(string currentISBN, List<string> ISBNList)
         {
-            foreach (var isbn in ISBNList)
-            {
-                if (currentISBN == isbn)
+                if (ISBNList.Contains(currentISBN))
                 {
                     return false;
                 }
-            }
 
             return true;
         }
