@@ -32,6 +32,8 @@ namespace Bokhandel.Forms
         private List<Förlag> Förlag { get; set; }
         private List<Kunder> Kunder { get; set; }
         private List<Order> Orders { get; set; }
+
+        private List<FörfattareBöckerFörlag> FörfattareBöckerFörlagsList { get; set; }
         private List<string> TableNameList => new List<string>() { "Butiker", "Författare", "Förlag", "Kunder", "Ordrar" };
 
         #region MainForm Events
@@ -80,6 +82,7 @@ namespace Bokhandel.Forms
             var orders = db.Orders.ToList();
             Författare = db.Författare.ToList();
             var författarePerBok = db.FörfattareBöckerFörlags;
+            FörfattareBöckerFörlagsList = db.FörfattareBöckerFörlags.ToList();
             isButik = false;
             isFörfattare = false;
 
@@ -99,16 +102,20 @@ namespace Bokhandel.Forms
                 {
                     for (var x = 0; x < 5; x++)
                     {
-                        if (string.IsNullOrEmpty(dataGridView.Rows[j].Cells[x].Value as string)) return;
+                        if (string.IsNullOrEmpty(dataGridView.Rows[j].Cells[x].Value as string)) break;
+
 
                         userInputBokInfo[x] = dataGridView.Rows[j].Cells[x].Value.ToString();
                     }
-                    förlag = dataGridView.Rows[j].Cells["Förlag"].Value as Förlag;
-                    db.Böcker.Add(EntityAdder.AddNyBok(userInputBokInfo));
-                    db.SaveChanges();
+                    if (!userInputBokInfo.Contains(null))
+                    {
+                        förlag = dataGridView.Rows[j].Cells["Förlag"].Value as Förlag;
+                        db.Böcker.Add(EntityAdder.AddNyBok(userInputBokInfo));
+                        db.SaveChanges();
 
-                    db.FörfattareBöckerFörlags.Add(EntityAdder.AddNyFörfattareBöckerFörlag(userInputBokInfo, förlag, activeFörfattare));
-                    db.SaveChanges();
+                        db.FörfattareBöckerFörlags.Add(EntityAdder.AddNyFörfattareBöckerFörlag(userInputBokInfo, förlag, activeFörfattare));
+                        db.SaveChanges();
+                    }
                 }
             }
         }
@@ -149,6 +156,7 @@ namespace Bokhandel.Forms
                     case Författare person:
                         toolStripMenuItemNyBok.Visible = true;
                         toolStripMenuItemDeleteFörfattare.Visible = true;
+                        activeFörfattare = person;
                         break;
                     case "TableNode":
                         if (node.Text == "Författare")
@@ -187,6 +195,9 @@ namespace Bokhandel.Forms
                             dataGridView.Rows.Clear();
                             dataGridView.Columns.Clear();
                         }
+                        break;
+                    case Författare person:
+                        activeFörfattare = person;
                         break;
                     default:
                         break;
@@ -349,13 +360,13 @@ namespace Bokhandel.Forms
             {   //check if any of the datagrid rows isbn are duplicate
                 for (int i = 0; i < dataGridView.Rows.Count; i++)
                 {
-                    if (dataGridView.Rows[i].Cells["ISBN"].Value == null) 
-                    { 
-                        continue; 
+                    if (dataGridView.Rows[i].Cells["ISBN"].Value == null)
+                    {
+                        continue;
                     }
 
                     var currentISBN = dataGridView.Rows[i].Cells["ISBN"].Value?.ToString();
-                    for (int j = i+1; j < dataGridView.Rows.Count; j++)
+                    for (int j = i + 1; j < dataGridView.Rows.Count; j++)
                     {
                         if (currentISBN != dataGridView.Rows[j].Cells["ISBN"].Value?.ToString())
                         {
@@ -376,12 +387,14 @@ namespace Bokhandel.Forms
                         {
                             MessageBox.Show("ISBN format is not correct, must be 13 numbers.", "Error");
                             dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = null;
+                            return;
                         }
                         else if (!EntityAdder.IsISBNUnique(dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value?.ToString(), GetISBNList) &&
                             e.RowIndex >= AmountOfRows)
                         {
                             MessageBox.Show("A book with that ISBN already exists!", "Error");
                             dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = null;
+                            return;
                         }
                         break;
                     case 3: // pris
@@ -389,6 +402,7 @@ namespace Bokhandel.Forms
                         {
                             MessageBox.Show("Price format is not correct, can only be numbers", "Error");
                             dataGridView.Rows[e.RowIndex].Cells["Pris"].Value = "";
+                            return;
                         }
                         break;
                     case 4: // utgivningsdatum
@@ -396,6 +410,7 @@ namespace Bokhandel.Forms
                         {
                             MessageBox.Show("Date format is not correct, use yy-mm-dd", "Error");
                             dataGridView.Rows[e.RowIndex].Cells["Utgivningsdatum"].Value = "";
+                            return;
                         }
                         break;
 
@@ -403,37 +418,49 @@ namespace Bokhandel.Forms
                         break;
                 }
 
-                if (e.RowIndex < AmountOfRows) return;
+
+                if (dataGridView.Rows[e.RowIndex].Tag is Böcker bok) //isbn, språk, pris, utgivningsdatum, förlag
                 {
-                    for (int i = 0; i < dataGridView.Rows.Count - 1; i++)
+                    if (!böcker.Contains(bok)) return;
+
+                    if (dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex] == dataGridView.Rows[e.RowIndex].Cells["ISBN"] ||
+                        dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex] == dataGridView.Rows[e.RowIndex].Cells["Förlag"])
                     {
-                        var currentISBN = dataGridView.Rows[i].Cells["ISBN"].Value?.ToString();
-                        var nextISBN = dataGridView.Rows[i + 1].Cells["ISBN"].Value?.ToString();
-                        if (currentISBN != nextISBN)
+                        var userInputBokInfo = new string[5];
+
+                        for (var i = 0; i < 5; i++)
                         {
-                            continue;
+                            if (string.IsNullOrEmpty(dataGridView.Rows[e.RowIndex].Cells[i].Value as string)) return;
+
+                            userInputBokInfo[i] = dataGridView.Rows[e.RowIndex].Cells[i].Value.ToString();
                         }
 
-                        if (string.IsNullOrEmpty(dataGridView.Rows[i].Cells["ISBN"].Value as string))
-                        {
-                            return;
-                        }
+                        var förlag = dataGridView.Rows[e.RowIndex].Cells["Förlag"].Value as Förlag;
 
-                        MessageBox.Show("A book with that ISBN already exists!", "Error");
-                        dataGridView.Rows[e.RowIndex].Cells["ISBN"].Value = null;
+                        db.Böcker.Remove(bok);
+                        db.SaveChanges();
+                        db.Böcker.Add(EntityAdder.AddNyBok(userInputBokInfo));
+                        db.SaveChanges();
+
+                        db.FörfattareBöckerFörlags.Add(EntityAdder.AddNyFörfattareBöckerFörlag(userInputBokInfo, förlag, activeFörfattare));
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        bok.Titel = dataGridView.Rows[e.RowIndex].Cells["Titel"].Value?.ToString();
+                        bok.Språk = dataGridView.Rows[e.RowIndex].Cells["Språk"].Value?.ToString();
+                        bok.Pris = decimal.Parse(dataGridView.Rows[e.RowIndex].Cells["Pris"].Value.ToString());
+                        bok.Utgivningsdatum = DateTime.Parse(dataGridView.Rows[e.RowIndex].Cells["Utgivningsdatum"].Value?.ToString());
                     }
                 }
             }
-
-
         }
         private void dataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0) return;
+            if (e.RowIndex < 0 || isFörfattare) return;
 
             var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
             var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
-            if (isFörfattare) return;
 
             if (cell is DataGridViewComboBoxCell comboBoxCell)
             {
@@ -483,7 +510,6 @@ namespace Bokhandel.Forms
         private void AddBookToStore(DataGridViewCellEventArgs e)
         {
             var cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
-            var thisRow = dataGridView.Rows[e.RowIndex];
             var lagerSaldo = dataGridView.Rows[e.RowIndex].Tag as LagerSaldo;
             var rows = dataGridView.Rows;
 
@@ -585,13 +611,24 @@ namespace Bokhandel.Forms
                         dataGridView.Columns.Add("Pris", "Pris");
                         dataGridView.Columns.Add("Utgivningsdatum", "Utgivningsdatum");
                         dataGridView.Columns.Add("Förlag", "Förlag");
+
                         foreach (var bokFörfattare in författarePerBok)
                             foreach (var bok in böcker)
                                 if (person.FörfattareId == bokFörfattare.FörfattareId)
                                     if (bok.Isbn == bokFörfattare.Isbn)
                                     {
                                         var rowIndex = dataGridView.Rows.Add(bok.Isbn, bok.Titel, bok.Språk, bok.Pris.ToString("0.##"),
-                                            bok.Utgivningsdatum.ToShortDateString(), bokFörfattare.Förlags.Namn);
+                                            bok.Utgivningsdatum.ToShortDateString());
+                                        dataGridView.Rows[rowIndex].Cells["Förlag"] = new DataGridViewComboBoxCell();
+                                        var comboBoxCell = dataGridView.Rows[rowIndex].Cells["Förlag"] as DataGridViewComboBoxCell;
+                                        comboBoxCell.ValueType = typeof(Förlag);
+                                        comboBoxCell.DisplayMember = "Namn";
+                                        comboBoxCell.ValueMember = "This";
+                                        foreach (var förlag in Förlag)
+                                        {
+                                            comboBoxCell.Items.Add(förlag.This);
+                                        }
+                                        comboBoxCell.Value = bokFörfattare.Förlags;
                                         dataGridView.Rows[rowIndex].Tag = bok;
                                     }
 
