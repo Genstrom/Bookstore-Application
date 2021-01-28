@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 #nullable disable
 
 namespace Bokhandel
 {
-    [DebuggerDisplay("{Titel}")]
     public class Böcker
     {
         public Böcker()

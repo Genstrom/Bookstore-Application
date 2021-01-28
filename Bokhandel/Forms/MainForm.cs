@@ -186,15 +186,8 @@ namespace Bokhandel.Forms
                 switch (treeView.SelectedNode.Tag)
                 {
                     case "TableNode":
-                        if (node.Text == "Författare")
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            dataGridView.Rows.Clear();
-                            dataGridView.Columns.Clear();
-                        }
+                        dataGridView.Rows.Clear();
+                        dataGridView.Columns.Clear();
                         break;
                     case Författare person:
                         activeFörfattare = person;
